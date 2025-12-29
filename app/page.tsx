@@ -332,15 +332,19 @@ export default function Home() {
                             {result.name_initials || '-'}
                           </td>
                           <td className="px-4 py-3 text-sm border-r border-black">
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                result.membership_status === 'Active'
-                                  ? 'bg-black text-white'
-                                  : 'bg-white text-black border border-black'
-                              }`}
-                            >
-                              {result.membership_status || '-'}
-                            </span>
+                            {result.membership_status ? (
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                  result.membership_status === 'Active'
+                                    ? 'bg-green-600 text-white'
+                                    : 'bg-red-600 text-white'
+                                }`}
+                              >
+                                {result.membership_status === 'Active' ? 'Active' : 'Not Active'}
+                              </span>
+                            ) : (
+                              '-'
+                            )}
                           </td>
                           <td className="px-4 py-3 text-sm border-r border-black">
                             {result.member_grade || '-'}
