@@ -30,17 +30,18 @@ class IEEEMembershipValidator {
 
   private extractFieldValue($: cheerio.CheerioAPI, labelText: string): string | null {
     // Find element containing the label text
-    let labelElement: cheerio.Cheerio<cheerio.Element> | null = null;
+    let foundElement: any = null;
     $('*').each((_, elem) => {
       const text = $(elem).text();
       if (text && text.includes(labelText)) {
-        labelElement = $(elem);
+        foundElement = elem;
         return false; // break
       }
     });
     
-    if (!labelElement || labelElement.length === 0) return null;
+    if (!foundElement) return null;
 
+    const labelElement = $(foundElement);
     const parent = labelElement.parent();
     if (parent.length === 0) return null;
 
@@ -106,17 +107,18 @@ class IEEEMembershipValidator {
   }
 
   private extractSocietyMemberships($: cheerio.CheerioAPI): string | null {
-    let labelElement: cheerio.Cheerio<cheerio.Element> | null = null;
+    let foundElement: any = null;
     $('*').each((_, elem) => {
       const text = $(elem).text();
       if (text && text.includes('Society membership')) {
-        labelElement = $(elem);
+        foundElement = elem;
         return false; // break
       }
     });
     
-    if (!labelElement || labelElement.length === 0) return null;
+    if (!foundElement) return null;
 
+    const labelElement = $(foundElement);
     const parent = labelElement.parent();
     if (parent.length === 0) return null;
 
@@ -254,7 +256,7 @@ export async function POST(request: NextRequest) {
 
       // Add delay between requests (except for the last one)
       if (idx < membershipIds.length - 1) {
-        await validator.sleep(validator.delay);
+        await validator.sleep(700);
       }
     }
 
