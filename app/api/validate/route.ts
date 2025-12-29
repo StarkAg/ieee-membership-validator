@@ -29,49 +29,56 @@ class IEEEMembershipValidator {
   }
 
   private extractFieldValue($: cheerio.CheerioAPI, labelText: string): string | null {
-    // Find element containing the label text
-    let foundElement: any = null;
+    // Find element containing the label text (usually in a <strong> tag)
+    let foundText: any = null;
     $('*').each((_, elem) => {
       const text = $(elem).text();
       if (text && text.includes(labelText)) {
-        foundElement = elem;
+        foundText = $(elem);
         return false; // break
       }
     });
     
-    if (!foundElement) return null;
+    if (!foundText || foundText.length === 0) return null;
 
-    const labelElement = $(foundElement);
-    const parent = labelElement.parent();
+    // Get the parent (usually <strong>)
+    const parent = foundText.parent();
     if (parent.length === 0) return null;
 
-    // Check for sibling span elements
+    // Check for sibling span elements (the value is usually in a sibling <span>)
     const nextSibling = parent.next();
     if (nextSibling.length > 0) {
       if (nextSibling.is('span')) {
         let value = nextSibling.text().trim();
         
-        // For name initials, collect all consecutive spans
+        // For name initials, collect all consecutive spans (e.g., "K" and "G")
         if (labelText === 'First and last name initials') {
           const spans: string[] = [value];
           let current = nextSibling;
-          while (current.next().is('span')) {
-            current = current.next();
-            spans.push(current.text().trim());
+          let nextSpan = current.next();
+          while (nextSpan.length > 0 && nextSpan.is('span')) {
+            spans.push(nextSpan.text().trim());
+            current = nextSpan;
+            nextSpan = current.next();
           }
           if (spans.length > 1) {
             return spans.join('. ') + '.';
+          }
+          // If only one span, return it with a period
+          if (spans.length === 1 && value) {
+            return value + '.';
           }
         }
         
         if (value) return value;
       } else {
+        // If it's not a span, try getting text from the sibling
         const value = nextSibling.text().trim();
         if (value && !value.includes(labelText)) return value;
       }
     }
 
-    // Try to extract from parent text (after colon)
+    // Try to extract from parent text (after colon) as fallback
     const fullText = parent.text();
     const colonIndex = fullText.indexOf(':');
     if (colonIndex !== -1) {
@@ -79,11 +86,13 @@ class IEEEMembershipValidator {
       if (value) return value;
     }
 
-    // Try next siblings
+    // Try all next siblings
     let sibling = parent.next();
     while (sibling.length > 0) {
       const text = sibling.text().trim();
-      if (text && !text.includes(labelText)) return text;
+      if (text && !text.includes(labelText) && text.length > 0) {
+        return text;
+      }
       sibling = sibling.next();
     }
 
