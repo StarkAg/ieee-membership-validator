@@ -48,25 +48,45 @@ export default function Home() {
     setProgress({ current: 0, total: ids.length });
 
     try {
-      const response = await fetch('/api/validate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          cookie,
-          membershipIds: ids,
-        }),
-      });
+      const allResults: ValidationResult[] = [];
+      const batchSize = 10; // Process 10 at a time to avoid timeout
+      let batchStart = 0;
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Validation failed');
+      while (batchStart < ids.length) {
+        const response = await fetch('/api/validate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            cookie,
+            membershipIds: ids,
+            batchStart,
+            batchSize,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Validation failed');
+        }
+
+        const data = await response.json();
+        allResults.push(...data.results);
+        setResults([...allResults]);
+        setProgress({ current: allResults.length, total: ids.length });
+
+        if (!data.hasMore) {
+          break;
+        }
+
+        batchStart = data.batchEnd;
+        
+        // Small delay between batches
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
 
-      const data = await response.json();
-      setResults(data.results);
-      setProgress({ current: data.results.length, total: ids.length });
+      setProgress({ current: allResults.length, total: ids.length });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {

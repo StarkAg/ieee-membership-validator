@@ -236,7 +236,7 @@ class IEEEMembershipValidator {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { cookie, membershipIds } = body;
+    const { cookie, membershipIds, batchStart = 0, batchSize = 10 } = body;
 
     if (!cookie) {
       return NextResponse.json({ error: 'Cookie is required' }, { status: 400 });
@@ -249,18 +249,29 @@ export async function POST(request: NextRequest) {
     const validator = new IEEEMembershipValidator(cookie);
     const results: ValidationResult[] = [];
 
-    for (let idx = 0; idx < membershipIds.length; idx++) {
-      const memberId = membershipIds[idx];
+    // Process in batches to avoid timeout
+    const startIdx = batchStart;
+    const endIdx = Math.min(startIdx + batchSize, membershipIds.length);
+    const batch = membershipIds.slice(startIdx, endIdx);
+
+    for (let idx = 0; idx < batch.length; idx++) {
+      const memberId = batch[idx];
       const result = await validator.validateMember(memberId);
       results.push(result);
 
       // Add delay between requests (except for the last one)
-      if (idx < membershipIds.length - 1) {
+      if (idx < batch.length - 1) {
         await validator.sleep(700);
       }
     }
 
-    return NextResponse.json({ results });
+    return NextResponse.json({ 
+      results,
+      batchStart: startIdx,
+      batchEnd: endIdx,
+      total: membershipIds.length,
+      hasMore: endIdx < membershipIds.length
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
