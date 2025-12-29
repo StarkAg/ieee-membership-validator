@@ -29,23 +29,32 @@ class IEEEMembershipValidator {
   }
 
   private extractFieldValue($: cheerio.CheerioAPI, labelText: string): string | null {
-    // Find element containing the label text (usually in a <strong> tag)
-    let foundText: any = null;
-    $('*').each((_, elem) => {
-      const text = $(elem).text();
+    // Find strong tag containing the label text
+    let foundElem: any = null;
+    
+    // Search through all strong tags
+    $('strong').each((_, elem) => {
+      const $elem = $(elem);
+      const text = $elem.text();
       if (text && text.includes(labelText)) {
-        foundText = $(elem);
+        foundElem = elem;
         return false; // break
       }
     });
     
-    if (!foundText || foundText.length === 0) return null;
+    if (!foundElem) return null;
+    
+    const labelElement = $(foundElem);
+    if (labelElement.length === 0) return null;
 
-    // Get the parent (usually <strong>)
-    const parent = foundText.parent();
+    // Get the parent element (usually the container of <strong>)
+    let parent = labelElement;
+    if (!labelElement.is('strong')) {
+      parent = labelElement.parent();
+    }
     if (parent.length === 0) return null;
 
-    // Check for sibling span elements (the value is usually in a sibling <span>)
+    // Check for sibling <span> elements (the value is usually in a sibling <span>)
     const nextSibling = parent.next();
     if (nextSibling.length > 0) {
       if (nextSibling.is('span')) {
@@ -57,7 +66,8 @@ class IEEEMembershipValidator {
           let current = nextSibling;
           let nextSpan = current.next();
           while (nextSpan.length > 0 && nextSpan.is('span')) {
-            spans.push(nextSpan.text().trim());
+            const spanText = nextSpan.text().trim();
+            if (spanText) spans.push(spanText);
             current = nextSpan;
             nextSpan = current.next();
           }
