@@ -98,7 +98,7 @@ export default function Home() {
         batchStart = data.batchEnd;
         
         // Small delay between batches
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 100));
     }
 
       setProgress({ current: allResults.length, total: ids.length });
