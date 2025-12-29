@@ -13,12 +13,15 @@ interface ValidationResult {
 }
 
 export default function Home() {
-  const [cookie, setCookie] = useState('');
+  const defaultCookie = 'eyJ6aXAiOiJERUYiLCJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiQk9Gbm5FbXdsUVUwVi1sRjRXcU1uWUxBZV8wIiwicGkuc3JpIjoiZEpuLVBBT3NXX1h5RTBYWldWb3hTZVRTeEd3LlRrbyJ9..A2Q1BqoArW_ZX2g_SJJsUw.oxtocDWwLUdJ-8KELqIkKmbUoE7Y3Xnx7osmBYi0d4eawJWxTeKrG9Yxu054fxgBtoDtk1NZGP7b0_AZYddKoLOdzTrE559tYo1tCDsm5NEa42hebMDR09Hj_d1peY_9sljmpJBWO_JYqVvZqMBPGNK3vbLeeC9foVxCodQ_2EuLyzM9CHnNkhJfp754r4KoREWdSUWeF2guPwYLN-AOhzoM9RVSvdW6nYGcfzE0whYuMid4CgO7gJjB0MASWIxFfJsYgLfd54Cqj_zGhY3yO8JMIDI8EC7IGjBLfkbY91qiuMrpIdW4UXGOcsSW3MzNAAdPKnVDkd6yEjHTNao7cuvhZnGOY6NOIBEUIhj5kL91pDcH33xEEoxZGIqWAZtKTrIn4BI7348lRQ42lDHPbL1cimNciVNIAXsjjFwuBDyNgl6N0UoI0e9kVm_Xr-2iFPPd_T_g67lR6jGZTFKhnM0ssX6ClCmqoZDYqCgnau_yIinHTrtDMNOl6yNeY7OIvAEPvbDknXq7EhuBp0OwgIbWsS5fhjwIXbPz_J-csx8oSOBWkTb4HYKREbCSdY2CdniykGLy2j5zQTJqW15dNDiLQJdqK3Z-CYQnSD2jE9RPhk8coW8nSvUPb6QVRG4Bd1L2-S7PcOPs69ppNd6z0g.at9ssPAtGl4zyygT-c6b6g';
+  
+  const [cookie, setCookie] = useState(defaultCookie);
   const [membershipIds, setMembershipIds] = useState('');
   const [results, setResults] = useState<ValidationResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
+  const [cookieLocked, setCookieLocked] = useState(true);
 
   const handleValidate = async () => {
     if (!cookie.trim()) {
@@ -71,24 +74,41 @@ export default function Home() {
           throw new Error(errorData.error || 'Validation failed');
         }
 
-        const data = await response.json();
-        allResults.push(...data.results);
-        setResults([...allResults]);
-        setProgress({ current: allResults.length, total: ids.length });
-
-        if (!data.hasMore) {
-          break;
-        }
-
-        batchStart = data.batchEnd;
-        
-        // Small delay between batches
-        await new Promise(resolve => setTimeout(resolve, 100));
+      const data = await response.json();
+      
+      // Check if any result has a session expired error
+      const hasSessionError = data.results.some((r: ValidationResult) => 
+        r.error && r.error.includes('Session expired')
+      );
+      
+      if (hasSessionError) {
+        setCookieLocked(false); // Unlock cookie input on session error
+        setError('Session expired. Please update your cookie and try again.');
+        break;
       }
+      
+      allResults.push(...data.results);
+      setResults([...allResults]);
+      setProgress({ current: allResults.length, total: ids.length });
+
+      if (!data.hasMore) {
+        break;
+      }
+
+      batchStart = data.batchEnd;
+      
+      // Small delay between batches
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
 
       setProgress({ current: allResults.length, total: ids.length });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(errorMessage);
+      // Unlock cookie input on any error
+      if (errorMessage.includes('Session') || errorMessage.includes('Cookie') || errorMessage.includes('401') || errorMessage.includes('403')) {
+        setCookieLocked(false);
+      }
     } finally {
       setLoading(false);
     }
@@ -148,19 +168,36 @@ export default function Home() {
           <div className="space-y-6">
             {/* Cookie Input */}
             <div>
-              <label htmlFor="cookie" className="block text-sm font-medium text-black mb-2">
-                Authentication Cookie (PA.Global_Websession)
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label htmlFor="cookie" className="block text-sm font-medium text-black">
+                  Authentication Cookie (PA.Global_Websession)
+                </label>
+                {cookieLocked && (
+                  <button
+                    type="button"
+                    onClick={() => setCookieLocked(false)}
+                    className="text-xs text-black opacity-60 hover:opacity-100 underline"
+                  >
+                    Unlock to edit
+                  </button>
+                )}
+              </div>
               <input
                 type="password"
                 id="cookie"
                 value={cookie}
                 onChange={(e) => setCookie(e.target.value)}
+                disabled={cookieLocked}
                 placeholder="Paste your PA.Global_Websession cookie here"
-                className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-white text-black placeholder-gray-400"
+                className={`w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-white text-black placeholder-gray-400 ${
+                  cookieLocked ? 'opacity-70 cursor-not-allowed' : ''
+                }`}
               />
               <p className="mt-2 text-sm text-black opacity-60">
-                Get this from your browser's Developer Tools → Application → Cookies
+                {cookieLocked 
+                  ? 'Using default cookie. Click "Unlock to edit" if validation fails.'
+                  : 'Get this from your browser\'s Developer Tools → Application → Cookies'
+                }
               </p>
             </div>
 
