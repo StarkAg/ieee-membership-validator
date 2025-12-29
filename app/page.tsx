@@ -158,7 +158,7 @@ export default function Home() {
     <div className="min-h-screen bg-black">
       {/* Header */}
       <header className="w-full border-b-2 border-white bg-black py-4 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto flex justify-end items-center">
+        <div className="w-full flex justify-end items-center">
           <div className="flex items-center gap-3">
             <p className="text-white opacity-70 text-sm font-medium">
               Crafted by Stark (Harsh)
