@@ -20,7 +20,7 @@ class IEEEMembershipValidator {
   constructor(cookie: string) {
     this.baseUrl = 'https://services24.ieee.org/membership-validator.html';
     this.cookie = cookie;
-    this.delay = 700; // milliseconds
+    this.delay = 300; // milliseconds - reduced for faster processing
   }
 
   private checkSessionExpiry($: cheerio.CheerioAPI): boolean {

@@ -95,10 +95,10 @@ export default function Home() {
         break;
       }
 
-      batchStart = data.batchEnd;
-      
-      // Small delay between batches
-      await new Promise(resolve => setTimeout(resolve, 100));
+        batchStart = data.batchEnd;
+        
+        // Small delay between batches
+        await new Promise(resolve => setTimeout(resolve, 50));
     }
 
       setProgress({ current: allResults.length, total: ids.length });
@@ -343,7 +343,9 @@ export default function Home() {
                                 {result.membership_status === 'Active' ? 'Active' : 'Not Active'}
                               </span>
                             ) : (
-                              '-'
+                              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-red-600 text-white">
+                                Not Active
+                              </span>
                             )}
                           </td>
                           <td className="px-4 py-3 text-sm border-r border-black">
