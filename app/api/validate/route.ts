@@ -126,25 +126,27 @@ class IEEEMembershipValidator {
   }
 
   private extractSocietyMemberships($: cheerio.CheerioAPI): string | null {
-    let foundElement: any = null;
-    $('*').each((_, elem) => {
-      const text = $(elem).text();
+    // Find strong tag containing "Society membership"
+    let foundElem: any = null;
+    $('strong').each((_, elem) => {
+      const $elem = $(elem);
+      const text = $elem.text();
       if (text && text.includes('Society membership')) {
-        foundElement = elem;
+        foundElem = elem;
         return false; // break
       }
     });
     
-    if (!foundElement) return null;
+    if (!foundElem) return null;
 
-    const labelElement = $(foundElement);
+    const labelElement = $(foundElem);
     const parent = labelElement.parent();
     if (parent.length === 0) return null;
 
     const societies: string[] = [];
 
-    // Look for ul/ol lists
-    const listElem = parent.nextAll('ul, ol').first();
+    // First, try to find a list (ul/ol) after the label
+    const listElem = parent.next('ul, ol');
     if (listElem.length > 0) {
       listElem.find('li').each((_, li) => {
         const text = $(li).text().trim();
@@ -157,37 +159,49 @@ class IEEEMembershipValidator {
       }
     }
 
-    // Check siblings
-    parent.nextAll('div, span, p, ul, ol').each((_, elem) => {
-      const $elem = $(elem);
-      if ($elem.is('ul, ol')) {
-        $elem.find('li').each((_, li) => {
-          const text = $(li).text().trim();
-          if (text && text.includes('IEEE')) {
-            societies.push(text);
-          }
-        });
-      } else {
-        const text = $elem.text().trim();
-        if (text && text.includes('IEEE') && text.includes('Society')) {
+    // If no immediate list, look for next siblings
+    parent.nextAll('ul, ol').first().find('li').each((_, li) => {
+      const text = $(li).text().trim();
+      if (text && text.includes('IEEE')) {
+        if (!societies.includes(text)) {
           societies.push(text);
         }
       }
     });
 
-    // Check all following elements
-    parent.find('~ *').each((_, elem) => {
-      const text = $(elem).text().trim();
-      if (
-        text &&
-        text.includes('IEEE') &&
-        text.includes('Society') &&
-        text.includes('Membership') &&
-        !societies.includes(text)
-      ) {
-        societies.push(text);
+    // Check parent's next siblings
+    parent.nextAll('div, span, p, ul, ol').each((_, elem) => {
+      const $elem = $(elem);
+      if ($elem.is('ul, ol')) {
+        $elem.find('li').each((_, li) => {
+          const text = $(li).text().trim();
+          if (text && text.includes('IEEE') && !societies.includes(text)) {
+            societies.push(text);
+          }
+        });
+      } else {
+        const text = $elem.text().trim();
+        if (text && text.includes('IEEE') && text.includes('Society') && !societies.includes(text)) {
+          societies.push(text);
+        }
       }
     });
+
+    // Also check elements that come after the parent in the document
+    let current = parent.next();
+    while (current.length > 0) {
+      if (current.is('ul, ol')) {
+        current.find('li').each((_, li) => {
+          const text = $(li).text().trim();
+          if (text && text.includes('IEEE') && text.includes('Society') && text.includes('Membership')) {
+            if (!societies.includes(text)) {
+              societies.push(text);
+            }
+          }
+        });
+      }
+      current = current.next();
+    }
 
     return societies.length > 0 ? societies.join(', ') : null;
   }
