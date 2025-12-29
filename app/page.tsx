@@ -167,7 +167,7 @@ export default function Home() {
               href="https://github.com/StarkAg"
               target="_blank"
               rel="noopener noreferrer"
-              className="opacity-70 hover:opacity-100 transition-opacity"
+              className="flex items-center gap-2 opacity-70 hover:opacity-100 transition-opacity text-white"
               aria-label="GitHub"
             >
               <svg
@@ -182,6 +182,7 @@ export default function Home() {
                   clipRule="evenodd"
                 />
               </svg>
+              <span className="text-sm font-medium">GitHub</span>
             </a>
           </div>
         </div>
