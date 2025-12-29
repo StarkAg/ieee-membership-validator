@@ -160,14 +160,14 @@ export default function Home() {
       <header className="w-full border-b-2 border-white bg-black py-4 px-4 sm:px-6 lg:px-8">
         <div className="w-full flex justify-end items-center">
           <div className="flex items-center gap-3">
-            <p className="text-white opacity-70 text-sm font-medium">
+            <p className="text-white opacity-70 text-sm font-bold">
               Crafted by Stark (Harsh)
             </p>
             <a
               href="https://github.com/StarkAg"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 opacity-70 hover:opacity-100 transition-opacity text-white"
+              className="opacity-70 hover:opacity-100 transition-opacity text-white"
               aria-label="GitHub"
             >
               <svg
@@ -182,7 +182,6 @@ export default function Home() {
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-sm font-medium">GitHub</span>
             </a>
           </div>
         </div>
