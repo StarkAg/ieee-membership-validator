@@ -115,20 +115,20 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+        <div className="bg-white rounded-lg shadow-2xl p-8 border border-gray-200">
+          <h1 className="text-4xl font-bold text-black mb-2">
             IEEE Membership Validator
           </h1>
-          <p className="text-gray-600 mb-8">
+          <p className="text-black mb-8 opacity-70">
             Bulk validate IEEE membership numbers and extract membership details
           </p>
 
           <div className="space-y-6">
             {/* Cookie Input */}
             <div>
-              <label htmlFor="cookie" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="cookie" className="block text-sm font-medium text-black mb-2">
                 Authentication Cookie (PA.Global_Websession)
               </label>
               <input
@@ -137,16 +137,16 @@ export default function Home() {
                 value={cookie}
                 onChange={(e) => setCookie(e.target.value)}
                 placeholder="Paste your PA.Global_Websession cookie here"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-white text-black placeholder-gray-400"
               />
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-sm text-black opacity-60">
                 Get this from your browser's Developer Tools → Application → Cookies
               </p>
             </div>
 
             {/* Membership IDs Input */}
             <div>
-              <label htmlFor="membershipIds" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="membershipIds" className="block text-sm font-medium text-black mb-2">
                 Membership IDs (one per line, or comma/space separated)
               </label>
               <textarea
@@ -155,32 +155,32 @@ export default function Home() {
                 onChange={(e) => setMembershipIds(e.target.value)}
                 placeholder="99634594&#10;12345678&#10;98765432"
                 rows={10}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-mono text-sm"
+                className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none font-mono text-sm bg-white text-black placeholder-gray-400"
               />
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-sm text-black opacity-60">
                 Enter IEEE member numbers (8-9 digits) or email addresses, one per line
               </p>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              <div className="bg-black border-2 border-black text-white px-4 py-3 rounded-lg">
                 {error}
               </div>
             )}
 
             {/* Progress */}
             {loading && (
-              <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg">
+              <div className="bg-black border-2 border-black text-white px-4 py-3 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span>Processing...</span>
                   <span>
                     {progress.current} / {progress.total}
                   </span>
                 </div>
-                <div className="w-full bg-blue-200 rounded-full h-2">
+                <div className="w-full bg-white rounded-full h-2">
                   <div
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    className="bg-white h-2 rounded-full transition-all duration-300"
                     style={{ width: `${(progress.current / progress.total) * 100}%` }}
                   />
                 </div>
@@ -191,7 +191,7 @@ export default function Home() {
             <button
               onClick={handleValidate}
               disabled={loading}
-              className="w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full bg-black text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border-2 border-black"
             >
               {loading ? 'Validating...' : 'Validate Memberships'}
             </button>
@@ -200,68 +200,68 @@ export default function Home() {
             {results.length > 0 && (
               <div className="mt-8">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-2xl font-bold text-black">
                     Results ({results.length} members)
                   </h2>
                   <button
                     onClick={handleDownload}
-                    className="bg-green-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                    className="bg-black text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-all duration-200 border-2 border-black"
                   >
                     Download CSV
                   </button>
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200 border border-gray-300">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-black border-2 border-black">
+                    <thead className="bg-black text-white">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-white">
                           IEEE Number
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-white">
                           Name Initials
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-white">
                           Status
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-white">
                           Grade
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-white">
                           Standards
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">
                           Societies
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-black">
                       {results.map((result, idx) => (
-                        <tr key={idx} className={result.error ? 'bg-red-50' : ''}>
-                          <td className="px-4 py-3 text-sm font-mono border-r">{result.ieee_number}</td>
-                          <td className="px-4 py-3 text-sm border-r">
+                        <tr key={idx} className={result.error ? 'bg-black text-white' : ''}>
+                          <td className="px-4 py-3 text-sm font-mono border-r border-black">{result.ieee_number}</td>
+                          <td className="px-4 py-3 text-sm border-r border-black">
                             {result.name_initials || '-'}
                           </td>
-                          <td className="px-4 py-3 text-sm border-r">
+                          <td className="px-4 py-3 text-sm border-r border-black">
                             <span
                               className={`px-2 py-1 rounded-full text-xs font-semibold ${
                                 result.membership_status === 'Active'
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-gray-100 text-gray-800'
+                                  ? 'bg-black text-white'
+                                  : 'bg-white text-black border border-black'
                               }`}
                             >
                               {result.membership_status || '-'}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-sm border-r">
+                          <td className="px-4 py-3 text-sm border-r border-black">
                             {result.member_grade || '-'}
                           </td>
-                          <td className="px-4 py-3 text-sm border-r">
+                          <td className="px-4 py-3 text-sm border-r border-black">
                             {result.standards_association_member || '-'}
                           </td>
                           <td className="px-4 py-3 text-sm">
                             {result.error ? (
-                              <span className="text-red-600">{result.error}</span>
+                              <span className="text-white">{result.error}</span>
                             ) : (
                               <div className="max-w-xs">
                                 {result.society_memberships ? (
@@ -286,6 +286,13 @@ export default function Home() {
               </div>
             )}
           </div>
+        </div>
+        
+        {/* Footer with subtle credit */}
+        <div className="mt-8 text-center">
+          <p className="text-white opacity-40 text-xs font-light">
+            Crafted by Stark (Harsh)
+          </p>
         </div>
       </div>
     </div>
