@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# IEEE Membership Validator Web App
+
+A web application for bulk validating IEEE membership numbers and extracting membership details.
+
+## Features
+
+- 🔐 Secure cookie-based authentication
+- 📋 Bulk validation of IEEE member numbers
+- 📊 Real-time progress tracking
+- 📥 CSV export of results
+- 🎨 Modern, responsive UI
+
+## Tech Stack
+
+- **Next.js 15** - React framework
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+- **Cheerio** - HTML parsing
+- **Axios** - HTTP requests
 
 ## Getting Started
 
-First, run the development server:
+### Local Development
 
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Run the development server:
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deployment
 
-## Learn More
+### Deploy to Vercel
 
-To learn more about Next.js, take a look at the following resources:
+1. Install Vercel CLI:
+```bash
+npm i -g vercel
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. Login to Vercel:
+```bash
+vercel login
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. Deploy:
+```bash
+vercel
+```
 
-## Deploy on Vercel
+Or connect your GitHub repository to Vercel for automatic deployments.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Usage
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Get your `PA.Global_Websession` cookie from your browser's Developer Tools
+2. Paste the cookie into the authentication field
+3. Enter IEEE member numbers (one per line, or comma/space separated)
+4. Click "Validate Memberships"
+5. Download results as CSV
+
+## License
+
+MIT
