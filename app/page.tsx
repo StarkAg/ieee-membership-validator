@@ -165,15 +165,15 @@ export default function Home() {
           <div className="text-white opacity-70 text-xs sm:text-sm font-mono">
             {APP_VERSION}
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <p className="text-white opacity-70 text-xs sm:text-sm font-bold hidden sm:block">
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            <p className="text-white opacity-70 text-[10px] sm:text-xs md:text-sm font-bold whitespace-nowrap">
               Crafted by Stark (Harsh)
             </p>
             <a
               href="https://github.com/StarkAg"
               target="_blank"
               rel="noopener noreferrer"
-              className="opacity-70 hover:opacity-100 transition-opacity text-white"
+              className="opacity-70 hover:opacity-100 transition-opacity text-white flex-shrink-0"
               aria-label="GitHub"
             >
               <svg
