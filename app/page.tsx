@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import packageJson from '../package.json';
 
 interface ValidationResult {
   ieee_number: string;
@@ -14,8 +15,8 @@ interface ValidationResult {
 
 export default function Home() {
   const defaultCookie = 'eyJ6aXAiOiJERUYiLCJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiQk9Gbm5FbXdsUVUwVi1sRjRXcU1uWUxBZV8wIiwicGkuc3JpIjoiRjFGX3FoTy1oaF9kNW9DcXNENDgwSmgydXA0LlRrbyJ9..yzADtnVcmE9Gzegl71PlMg.wfivnc-nUqT6-U8WQiR0iaSmXZb-NEkdzuRoPjP4kmuOiWNm8-IWbBvIbNtCYaclpGpMgUUFd596M_X0tCyOlyfrgpoOWgGXLBJF99TfZb_l-JQEx8T9t5IeP12EyNH9EqYw0SgOh7H_sfbzpeb2bLyKuqwWvHe0ATa9RtADFn7840E0lnN8QKQc-5qDskaglmc01o46JuKGDSYNkY0ffiLoRTPJwF44TtaeZxYNGI5g4dZxQbEsKgpcvP2r4jKYG-PeeeQ4OgehsmGUFtp5Y9yGI5Z8qaa_SOCDk5MTjlestgfEIQL7Q2kk-BID--CtZE0iz9_X8bB48H5YxpNUtQg04sOCK4aj3Tz3lcEZMALdGKILFgdQ6qphZFzt5teJP3b0dME1-3TjErcPqLn4dhyEUvCIEzp-5-02YsDQyPrWIQQLajRUlRXmyVaWwzoXd15cKenLGvh1LNWJxvj2pelbzm7VCkd1JAR6SKl_nBoAaWaCERezamKWC1YztKDKtQCeV6xw5GDNez4LziElZT2_q6fPQnRFp5SxqrF85ZIn3hWGk-C8wdtlGq1O5nCiSKUjm8b1jN6e_8utLAIafb4u-lTURps-i4lhsjHL4hLvCVpk6qCfpkw9DiyQk-dC7-h_ZQqntMR3aM95kVmwEg.DvoszMj03H_Vm98DngUYVw';
-  // Update this version string whenever you deploy a new version
-  const APP_VERSION = 'v1.0.0';
+  // Version automatically read from package.json
+  const APP_VERSION = `v${packageJson.version}`;
   
   const [cookie, setCookie] = useState(defaultCookie);
   const [membershipIds, setMembershipIds] = useState('');
