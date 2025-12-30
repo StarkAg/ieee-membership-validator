@@ -63,10 +63,12 @@ To enable automatic cookie refresh when 401 errors are detected, set these envir
 - `GITHUB_TOKEN`: A GitHub Personal Access Token with `workflow` scope
 - `GITHUB_REPO`: Your repository in format `owner/repo` (e.g., `StarkAg/ieee-membership-validator`)
 
-**To create a GitHub token:**
-1. Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
-2. Generate a new token with `workflow` scope
-3. Add it as `GITHUB_TOKEN` in Vercel environment variables
+📖 **Detailed Setup Guide**: See [VERCEL_ENV_SETUP.md](./VERCEL_ENV_SETUP.md) for step-by-step instructions.
+
+**Quick Steps:**
+1. Create a GitHub token: GitHub Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token (classic) → Select `workflow` scope
+2. Add in Vercel: Project Settings → Environment Variables → Add `GITHUB_TOKEN` and `GITHUB_REPO`
+3. Redeploy your application
 
 **Note:** If these variables are not set, the app will still work but won't automatically trigger cookie refresh on 401 errors.
 
