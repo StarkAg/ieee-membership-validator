@@ -53,30 +53,63 @@ jobs:
                   
                   try:
                       page.goto(IEEE_LOGIN_URL, wait_until='networkidle', timeout=60000)
-                      time.sleep(2)
+                      time.sleep(3)
                       
-                      # Try multiple selectors for email field
+                      # Debug: Print page title and URL
+                      print(f"Page title: {page.title()}", file=sys.stderr)
+                      print(f"Page URL: {page.url()}", file=sys.stderr)
+                      
+                      # Try multiple selectors for email field (more comprehensive)
                       email_selectors = [
                           'input[type="email"]',
                           'input[name="email"]',
+                          'input[name="username"]',
+                          'input[name="userName"]',
                           'input[id*="email"]',
+                          'input[id*="Email"]',
+                          'input[id*="username"]',
+                          'input[id*="userName"]',
                           'input[placeholder*="Email"]',
+                          'input[placeholder*="email"]',
+                          'input[placeholder*="Username"]',
                           '#email',
-                          'input.form-control'
+                          '#username',
+                          '#userName',
+                          'input.form-control',
+                          'input[class*="email"]',
+                          'input[class*="username"]',
+                          'input[autocomplete="email"]',
+                          'input[autocomplete="username"]'
                       ]
                       
                       email_filled = False
                       for selector in email_selectors:
                           try:
-                              email_field = page.wait_for_selector(selector, timeout=5000)
+                              email_field = page.wait_for_selector(selector, timeout=3000, state='visible')
                               if email_field:
+                                  email_field.click()
                                   email_field.fill(username)
                                   email_filled = True
+                                  print(f"✓ Found email field with selector: {selector}", file=sys.stderr)
                                   break
-                          except:
+                          except Exception as e:
                               continue
                       
                       if not email_filled:
+                          # Last resort: try to find any input field and fill it
+                          print("Trying fallback: finding any input field...", file=sys.stderr)
+                          all_inputs = page.query_selector_all('input[type="text"], input[type="email"], input:not([type="hidden"]):not([type="submit"]):not([type="button"])')
+                          if all_inputs:
+                              first_input = all_inputs[0]
+                              first_input.click()
+                              first_input.fill(username)
+                              email_filled = True
+                              print("✓ Used fallback method to fill email", file=sys.stderr)
+                      
+                      if not email_filled:
+                          # Save page HTML for debugging
+                          page_content = page.content()
+                          print(f"Page HTML snippet (first 2000 chars): {page_content[:2000]}", file=sys.stderr)
                           raise Exception("Could not find email field")
                       
                       time.sleep(1)
@@ -93,13 +126,25 @@ jobs:
                       password_filled = False
                       for selector in password_selectors:
                           try:
-                              password_field = page.query_selector(selector)
+                              password_field = page.wait_for_selector(selector, timeout=3000, state='visible')
                               if password_field:
+                                  password_field.click()
                                   password_field.fill(password)
                                   password_filled = True
+                                  print(f"✓ Found password field with selector: {selector}", file=sys.stderr)
                                   break
-                          except:
+                          except Exception as e:
                               continue
+                      
+                      if not password_filled:
+                          # Fallback: find password input by type
+                          print("Trying fallback: finding password input...", file=sys.stderr)
+                          password_inputs = page.query_selector_all('input[type="password"]')
+                          if password_inputs:
+                              password_inputs[0].click()
+                              password_inputs[0].fill(password)
+                              password_filled = True
+                              print("✓ Used fallback method to fill password", file=sys.stderr)
                       
                       if not password_filled:
                           raise Exception("Could not find password field")
