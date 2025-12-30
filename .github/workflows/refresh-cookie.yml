@@ -215,34 +215,34 @@ jobs:
           IEEE_USERNAME: ${{ secrets.IEEE_USERNAME }}
           IEEE_PASSWORD: ${{ secrets.IEEE_PASSWORD }}
         run: |
+          set +e  # Don't exit on error immediately
           echo "🔐 Logging into IEEE..."
           echo "Username: ${IEEE_USERNAME:0:5}*** (hidden)"
           
-          # Run login script - stderr for debug, stdout for cookie
-          python /tmp/ieee_login.py > cookie_output.txt 2> error_output.txt
+          # Run login script and capture all output
+          python /tmp/ieee_login.py > cookie_output.txt 2>&1
           EXIT_CODE=$?
           
-          # Show debug output
-          echo "=== Debug Output ==="
-          cat error_output.txt || true
-          echo "==================="
+          # Always show output for debugging
+          echo "=== Full Output (stdout + stderr) ==="
+          cat cookie_output.txt || echo "(no output file)"
+          echo "===================================="
           
           if [ $EXIT_CODE -ne 0 ]; then
             echo "❌ Login script failed with exit code $EXIT_CODE"
-            echo "Full error output:"
-            cat error_output.txt
+            echo ""
+            echo "Checking output files..."
+            ls -la cookie_output.txt error_output.txt 2>&1 || true
             exit 1
           fi
           
-          # Get cookie from stdout (last line)
-          COOKIE=$(tail -n 1 cookie_output.txt)
+          # Get cookie from stdout (should be last non-empty line)
+          COOKIE=$(grep -v "^Starting\|^Login\|^Error:" cookie_output.txt | tail -n 1 | tr -d '\n\r')
           
           if [ -z "$COOKIE" ] || [ "${#COOKIE}" -lt 50 ]; then
             echo "❌ Cookie is empty or too short (length: ${#COOKIE}). Login may have failed."
-            echo "Cookie output:"
-            cat cookie_output.txt || echo "(empty)"
-            echo "Error output:"
-            cat error_output.txt || echo "(empty)"
+            echo "Full output:"
+            cat cookie_output.txt
             exit 1
           fi
           
