@@ -182,14 +182,22 @@ jobs:
               password = os.getenv('IEEE_PASSWORD')
               
               if not username or not password:
-                  print("Error: IEEE_USERNAME and IEEE_PASSWORD environment variables required")
+                  print("Error: IEEE_USERNAME and IEEE_PASSWORD environment variables required", file=sys.stderr)
                   sys.exit(1)
               
               try:
+                  print("Starting login process...", file=sys.stderr)
                   cookie = login_and_get_cookie(username, password)
-                  print(cookie)
+                  if cookie:
+                      print(cookie)
+                      print("Login successful!", file=sys.stderr)
+                  else:
+                      print("Error: Cookie is None", file=sys.stderr)
+                      sys.exit(1)
               except Exception as e:
                   print(f"Error: {str(e)}", file=sys.stderr)
+                  import traceback
+                  traceback.print_exc(file=sys.stderr)
                   sys.exit(1)
           EOF
 
@@ -207,19 +215,40 @@ jobs:
           IEEE_USERNAME: ${{ secrets.IEEE_USERNAME }}
           IEEE_PASSWORD: ${{ secrets.IEEE_PASSWORD }}
         run: |
-          set -e
           echo "🔐 Logging into IEEE..."
-          COOKIE=$(python /tmp/ieee_login.py 2>&1)
-          if [ $? -ne 0 ]; then
-            echo "❌ Login failed. Check the error above."
+          echo "Username: ${IEEE_USERNAME:0:5}*** (hidden)"
+          
+          # Run login script - stderr for debug, stdout for cookie
+          python /tmp/ieee_login.py > cookie_output.txt 2> error_output.txt
+          EXIT_CODE=$?
+          
+          # Show debug output
+          echo "=== Debug Output ==="
+          cat error_output.txt || true
+          echo "==================="
+          
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "❌ Login script failed with exit code $EXIT_CODE"
+            echo "Full error output:"
+            cat error_output.txt
             exit 1
           fi
-          if [ -z "$COOKIE" ]; then
-            echo "❌ Cookie is empty. Login may have failed."
+          
+          # Get cookie from stdout (last line)
+          COOKIE=$(tail -n 1 cookie_output.txt)
+          
+          if [ -z "$COOKIE" ] || [ "${#COOKIE}" -lt 50 ]; then
+            echo "❌ Cookie is empty or too short (length: ${#COOKIE}). Login may have failed."
+            echo "Cookie output:"
+            cat cookie_output.txt || echo "(empty)"
+            echo "Error output:"
+            cat error_output.txt || echo "(empty)"
             exit 1
           fi
+          
           echo "COOKIE=$COOKIE" >> $GITHUB_ENV
           echo "✅ Cookie refreshed successfully (length: ${#COOKIE} chars)"
+          echo "Cookie preview: ${COOKIE:0:50}..."
 
       - name: Update web app cookie
         run: |
