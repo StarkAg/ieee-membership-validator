@@ -313,14 +313,65 @@ export async function POST(request: NextRequest) {
     const endIdx = Math.min(startIdx + batchSize, membershipIds.length);
     const batch = membershipIds.slice(startIdx, endIdx);
 
+    let has401Error = false;
+    let refreshTriggered = false;
+
     for (let idx = 0; idx < batch.length; idx++) {
       const memberId = batch[idx];
       const result = await validator.validateMember(memberId);
       results.push(result);
 
+      // Check for 401 error
+      if (result.error && (result.error.includes('401') || result.error.includes('Session expired'))) {
+        has401Error = true;
+      }
+
       // Add delay between requests (except for the last one)
       if (idx < batch.length - 1) {
         await validator.sleep(700);
+      }
+    }
+
+    // If 401 error detected, trigger GitHub Actions workflow to refresh cookie
+    if (has401Error && !refreshTriggered) {
+      try {
+        const githubToken = process.env.GITHUB_TOKEN;
+        const githubRepo = process.env.GITHUB_REPO; // Format: "owner/repo"
+        const workflowId = 'refresh-cookie.yml';
+
+        if (githubToken && githubRepo) {
+          const [owner, repo] = githubRepo.split('/');
+          if (owner && repo) {
+            const refreshResponse = await fetch(
+              `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`,
+              {
+                method: 'POST',
+                headers: {
+                  'Accept': 'application/vnd.github+json',
+                  'Authorization': `Bearer ${githubToken}`,
+                  'X-GitHub-Api-Version': '2022-11-28',
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  ref: 'main',
+                }),
+              }
+            );
+
+            if (refreshResponse.ok) {
+              refreshTriggered = true;
+              console.log('✅ Cookie refresh workflow triggered successfully');
+            } else {
+              const errorText = await refreshResponse.text();
+              console.error('Failed to trigger refresh workflow:', refreshResponse.status, errorText);
+            }
+          }
+        } else {
+          console.warn('GITHUB_TOKEN or GITHUB_REPO not configured - cannot auto-refresh cookie');
+        }
+      } catch (error) {
+        console.error('Error triggering refresh workflow:', error);
+        // Don't fail the request if refresh trigger fails
       }
     }
 
@@ -329,7 +380,9 @@ export async function POST(request: NextRequest) {
       batchStart: startIdx,
       batchEnd: endIdx,
       total: membershipIds.length,
-      hasMore: endIdx < membershipIds.length
+      hasMore: endIdx < membershipIds.length,
+      refreshTriggered: refreshTriggered,
+      has401Error: has401Error
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });

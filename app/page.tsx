@@ -86,7 +86,13 @@ export default function Home() {
       
       if (hasSessionError) {
         setCookieLocked(false); // Unlock cookie input on session error
-        setError('Session expired or cookie invalid (401/403). Please update your cookie and try again.');
+        let errorMsg = 'Session expired or cookie invalid (401/403). ';
+        if (data.refreshTriggered) {
+          errorMsg += 'Cookie refresh workflow has been automatically triggered. The cookie will be updated shortly.';
+        } else {
+          errorMsg += 'Please update your cookie and try again.';
+        }
+        setError(errorMsg);
         break;
       }
       

@@ -9,6 +9,7 @@ A web application for bulk validating IEEE membership numbers and extracting mem
 - 📊 Real-time progress tracking
 - 📥 CSV export of results
 - 🎨 Modern, responsive UI
+- 🔄 Automatic cookie refresh via GitHub Actions (when 401 errors detected)
 
 ## Tech Stack
 
@@ -54,6 +55,20 @@ vercel
 ```
 
 Or connect your GitHub repository to Vercel for automatic deployments.
+
+### Environment Variables (Optional - for auto-refresh)
+
+To enable automatic cookie refresh when 401 errors are detected, set these environment variables in Vercel:
+
+- `GITHUB_TOKEN`: A GitHub Personal Access Token with `workflow` scope
+- `GITHUB_REPO`: Your repository in format `owner/repo` (e.g., `StarkAg/ieee-membership-validator`)
+
+**To create a GitHub token:**
+1. Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Generate a new token with `workflow` scope
+3. Add it as `GITHUB_TOKEN` in Vercel environment variables
+
+**Note:** If these variables are not set, the app will still work but won't automatically trigger cookie refresh on 401 errors.
 
 ## Usage
 
