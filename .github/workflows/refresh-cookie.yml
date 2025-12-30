@@ -1,0 +1,248 @@
+name: Refresh IEEE Cookie
+
+on:
+  schedule:
+    # Run every 6 hours (at minute 0 of every 6th hour)
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  refresh-cookie:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          playwright install chromium
+          playwright install-deps chromium
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 pandas openpyxl
+
+      - name: Create login script
+        run: |
+          cat > /tmp/ieee_login.py << 'EOF'
+          from playwright.sync_api import sync_playwright
+          import json
+          import time
+          import sys
+          import os
+
+          IEEE_LOGIN_URL = "https://www.ieee.org/profile/public/createwebaccount/showSignIn.html"
+
+          def login_and_get_cookie(username: str, password: str):
+              with sync_playwright() as p:
+                  browser = p.chromium.launch(headless=True)
+                  context = browser.new_context(
+                      user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                  )
+                  page = context.new_page()
+                  
+                  try:
+                      page.goto(IEEE_LOGIN_URL, wait_until='networkidle', timeout=60000)
+                      time.sleep(2)
+                      
+                      # Try multiple selectors for email field
+                      email_selectors = [
+                          'input[type="email"]',
+                          'input[name="email"]',
+                          'input[id*="email"]',
+                          'input[placeholder*="Email"]',
+                          '#email',
+                          'input.form-control'
+                      ]
+                      
+                      email_filled = False
+                      for selector in email_selectors:
+                          try:
+                              email_field = page.wait_for_selector(selector, timeout=5000)
+                              if email_field:
+                                  email_field.fill(username)
+                                  email_filled = True
+                                  break
+                          except:
+                              continue
+                      
+                      if not email_filled:
+                          raise Exception("Could not find email field")
+                      
+                      time.sleep(1)
+                      
+                      # Try multiple selectors for password field
+                      password_selectors = [
+                          'input[type="password"]',
+                          'input[name="password"]',
+                          'input[id*="password"]',
+                          '#password',
+                          'input.form-control[type="password"]'
+                      ]
+                      
+                      password_filled = False
+                      for selector in password_selectors:
+                          try:
+                              password_field = page.query_selector(selector)
+                              if password_field:
+                                  password_field.fill(password)
+                                  password_filled = True
+                                  break
+                          except:
+                              continue
+                      
+                      if not password_filled:
+                          raise Exception("Could not find password field")
+                      
+                      time.sleep(1)
+                      
+                      # Try multiple selectors for submit button
+                      submit_selectors = [
+                          'button[type="submit"]',
+                          'input[type="submit"]',
+                          'button:has-text("Sign In")',
+                          'button:has-text("Login")',
+                          'button:has-text("Submit")',
+                          'form button',
+                          '.btn-primary',
+                          '#submit'
+                      ]
+                      
+                      submitted = False
+                      for selector in submit_selectors:
+                          try:
+                              submit_button = page.query_selector(selector)
+                              if submit_button:
+                                  submit_button.click()
+                                  submitted = True
+                                  break
+                          except:
+                              continue
+                      
+                      if not submitted:
+                          # Try pressing Enter
+                          page.keyboard.press('Enter')
+                      
+                      # Wait for navigation/redirect
+                      page.wait_for_load_state('networkidle', timeout=30000)
+                      time.sleep(5)
+                      
+                      # Check for CAPTCHA
+                      if 'captcha' in page.content().lower() or 'recaptcha' in page.content().lower():
+                          raise Exception("CAPTCHA detected - manual intervention required")
+                      
+                      # Check for login errors
+                      error_indicators = [
+                          'invalid',
+                          'incorrect',
+                          'error',
+                          'failed',
+                          'wrong password',
+                          'wrong email'
+                      ]
+                      
+                      page_content_lower = page.content().lower()
+                      for error in error_indicators:
+                          if error in page_content_lower:
+                              # Check if it's actually an error message
+                              if any(indicator in page_content_lower for indicator in ['message', 'alert', 'warning']):
+                                  raise Exception(f"Login failed: {error} detected")
+                      
+                      # Extract cookie
+                      cookies = context.cookies()
+                      cookie_value = None
+                      
+                      for cookie in cookies:
+                          if cookie['name'] == 'PA.Global_Websession':
+                              cookie_value = cookie['value']
+                              break
+                      
+                      if not cookie_value:
+                          raise Exception("PA.Global_Websession cookie not found after login")
+                      
+                      browser.close()
+                      return cookie_value
+                      
+                  except Exception as e:
+                      browser.close()
+                      raise e
+
+          if __name__ == "__main__":
+              username = os.getenv('IEEE_USERNAME')
+              password = os.getenv('IEEE_PASSWORD')
+              
+              if not username or not password:
+                  print("Error: IEEE_USERNAME and IEEE_PASSWORD environment variables required")
+                  sys.exit(1)
+              
+              try:
+                  cookie = login_and_get_cookie(username, password)
+                  print(cookie)
+              except Exception as e:
+                  print(f"Error: {str(e)}", file=sys.stderr)
+                  sys.exit(1)
+          EOF
+
+      - name: Login and get cookie
+        env:
+          IEEE_USERNAME: ${{ secrets.IEEE_USERNAME }}
+          IEEE_PASSWORD: ${{ secrets.IEEE_PASSWORD }}
+        run: |
+          COOKIE=$(python /tmp/ieee_login.py)
+          echo "COOKIE=$COOKIE" >> $GITHUB_ENV
+          echo "Cookie refreshed successfully"
+
+      - name: Update web app cookie
+        run: |
+          if [ -z "$COOKIE" ]; then
+            echo "Error: Cookie not set"
+            exit 1
+          fi
+          
+          python3 << EOF
+          import re
+          
+          cookie = "$COOKIE"
+          file_path = "app/page.tsx"
+          
+          with open(file_path, 'r') as f:
+              content = f.read()
+          
+          # Find and replace the defaultCookie value
+          pattern = r"(const defaultCookie = ')[^']*(';)"
+          replacement = r"\1" + cookie + r"\2"
+          new_content = re.sub(pattern, replacement, content)
+          
+          if new_content == content:
+              print("Warning: Cookie pattern not found in file")
+              exit(1)
+          
+          with open(file_path, 'w') as f:
+              f.write(new_content)
+          
+          print("✓ Web app cookie updated")
+          EOF
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add app/page.tsx
+          git diff --staged --quiet || git commit -m "Auto-refresh cookie via GitHub Actions [skip ci]"
+          git push
+
+      - name: Summary
+        run: |
+          echo "✅ Cookie refresh completed successfully!"
+          echo "🔄 Vercel will automatically redeploy with the new cookie"
+
