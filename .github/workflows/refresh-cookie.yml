@@ -57,7 +57,18 @@ jobs:
                       
                       # Debug: Print page title and URL
                       print(f"Page title: {page.title()}", file=sys.stderr)
-                      print(f"Page URL: {page.url()}", file=sys.stderr)
+                      print(f"Page URL: {page.url}", file=sys.stderr)
+                      
+                      # Check if request was rejected
+                      page_title = page.title().lower()
+                      page_url = page.url.lower()
+                      page_content = page.content().lower()
+                      
+                      if "request rejected" in page_title or "request rejected" in page_content:
+                          raise Exception("IEEE blocked the request - likely bot detection. May need to use different approach.")
+                      
+                      if "access denied" in page_content or "blocked" in page_content:
+                          raise Exception("IEEE blocked access - bot detection triggered")
                       
                       # Try multiple selectors for email field (more comprehensive)
                       email_selectors = [
