@@ -249,6 +249,32 @@ class IEEEMembershipValidator {
         error: null,
       };
     } catch (error: any) {
+      // Check for 401 Unauthorized (expired cookie)
+      if (error.response && error.response.status === 401) {
+        return {
+          ieee_number: memberNumber,
+          name_initials: null,
+          membership_status: null,
+          member_grade: null,
+          standards_association_member: null,
+          society_memberships: null,
+          error: 'Session expired: 401 Unauthorized - Cookie is invalid or expired',
+        };
+      }
+      
+      // Check for 403 Forbidden (access denied)
+      if (error.response && error.response.status === 403) {
+        return {
+          ieee_number: memberNumber,
+          name_initials: null,
+          membership_status: null,
+          member_grade: null,
+          standards_association_member: null,
+          society_memberships: null,
+          error: 'Access denied: 403 Forbidden - Cookie may be invalid',
+        };
+      }
+      
       return {
         ieee_number: memberNumber,
         name_initials: null,

@@ -79,14 +79,14 @@ export default function Home() {
 
       const data = await response.json();
       
-      // Check if any result has a session expired error
+      // Check if any result has a session expired or 401 error
       const hasSessionError = data.results.some((r: ValidationResult) => 
-        r.error && r.error.includes('Session expired')
+        r.error && (r.error.includes('Session expired') || r.error.includes('401') || r.error.includes('403'))
       );
       
       if (hasSessionError) {
         setCookieLocked(false); // Unlock cookie input on session error
-        setError('Session expired. Please update your cookie and try again.');
+        setError('Session expired or cookie invalid (401/403). Please update your cookie and try again.');
         break;
       }
       
