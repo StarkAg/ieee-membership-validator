@@ -160,13 +160,13 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="w-full border-b-2 border-white bg-black py-4 px-4 sm:px-6 lg:px-8">
+      <header className="w-full border-b-2 border-white bg-black py-3 px-3 sm:py-4 sm:px-6 lg:px-8">
         <div className="w-full flex items-center justify-between">
           <div className="text-white opacity-70 text-xs sm:text-sm font-mono">
             {APP_VERSION}
           </div>
-          <div className="flex items-center gap-3">
-            <p className="text-white opacity-70 text-sm font-bold">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <p className="text-white opacity-70 text-xs sm:text-sm font-bold hidden sm:block">
               Crafted by Stark (Harsh)
             </p>
             <a
@@ -177,7 +177,7 @@ export default function Home() {
               aria-label="GitHub"
             >
               <svg
-                className="w-6 h-6"
+                className="w-5 h-5 sm:w-6 sm:h-6"
                 fill="currentColor"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
@@ -193,28 +193,28 @@ export default function Home() {
         </div>
       </header>
       
-      <div className="py-12 px-4 sm:px-6 lg:px-8">
+      <div className="py-6 sm:py-12 px-3 sm:px-4 lg:px-8">
         <div className="max-w-6xl mx-auto">
-        <div className="bg-white rounded-lg shadow-2xl p-8 border border-gray-200">
-          <h1 className="text-4xl font-bold text-black mb-2">
+        <div className="bg-white rounded-lg shadow-2xl p-4 sm:p-6 lg:p-8 border border-gray-200">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-2">
             IEEE Membership Validator
           </h1>
-          <p className="text-black mb-8 opacity-70">
+          <p className="text-sm sm:text-base text-black mb-6 sm:mb-8 opacity-70">
             Bulk validate IEEE membership numbers and extract membership details
           </p>
 
           <div className="space-y-6">
             {/* Cookie Input */}
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label htmlFor="cookie" className="block text-sm font-medium text-black">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-1 sm:gap-0">
+                <label htmlFor="cookie" className="block text-xs sm:text-sm font-medium text-black">
                   Authentication Cookie (PA.Global_Websession)
                 </label>
                 {cookieLocked && (
                   <button
                     type="button"
                     onClick={() => setCookieLocked(false)}
-                    className="text-xs text-black opacity-60 hover:opacity-100 underline"
+                    className="text-xs text-black opacity-60 hover:opacity-100 underline self-start sm:self-auto"
                   >
                     Unlock to edit
                   </button>
@@ -227,11 +227,11 @@ export default function Home() {
                 onChange={(e) => setCookie(e.target.value)}
                 disabled={cookieLocked}
                 placeholder="Paste your PA.Global_Websession cookie here"
-                className={`w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-white text-black placeholder-gray-400 ${
+                className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-white text-black placeholder-gray-400 ${
                   cookieLocked ? 'opacity-70 cursor-not-allowed' : ''
                 }`}
               />
-              <p className="mt-2 text-sm text-black opacity-60">
+              <p className="mt-2 text-xs sm:text-sm text-black opacity-60">
                 {cookieLocked 
                   ? 'Using default cookie. Click "Unlock to edit" if validation fails.'
                   : 'Get this from your browser\'s Developer Tools → Application → Cookies'
@@ -241,7 +241,7 @@ export default function Home() {
 
             {/* Membership IDs Input */}
             <div>
-              <label htmlFor="membershipIds" className="block text-sm font-medium text-black mb-2">
+              <label htmlFor="membershipIds" className="block text-xs sm:text-sm font-medium text-black mb-2">
                 Membership IDs (one per line, or comma/space separated)
               </label>
               <textarea
@@ -249,25 +249,25 @@ export default function Home() {
                 value={membershipIds}
                 onChange={(e) => setMembershipIds(e.target.value)}
                 placeholder="99634594&#10;12345678&#10;98765432"
-                rows={10}
-                className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none font-mono text-sm bg-white text-black placeholder-gray-400"
+                rows={8}
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none font-mono text-xs sm:text-sm bg-white text-black placeholder-gray-400"
               />
-              <p className="mt-2 text-sm text-black opacity-60">
+              <p className="mt-2 text-xs sm:text-sm text-black opacity-60">
                 Enter IEEE member numbers (8-9 digits) or email addresses, one per line
               </p>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="bg-black border-2 border-black text-white px-4 py-3 rounded-lg">
+              <div className="bg-black border-2 border-black text-white px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm">
                 {error}
               </div>
             )}
 
             {/* Progress */}
             {loading && (
-              <div className="bg-black border-2 border-black text-white px-4 py-3 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
+              <div className="bg-black border-2 border-black text-white px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg">
+                <div className="flex items-center justify-between mb-2 text-xs sm:text-sm">
                   <span>Processing...</span>
                   <span>
                     {progress.current} / {progress.total}
@@ -286,103 +286,107 @@ export default function Home() {
             <button
               onClick={handleValidate}
               disabled={loading}
-              className="w-full bg-black text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border-2 border-black"
+              className="w-full bg-black text-white py-3 sm:py-3.5 px-6 rounded-lg text-sm sm:text-base font-semibold hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border-2 border-black touch-manipulation"
             >
               {loading ? 'Validating...' : 'Validate Memberships'}
             </button>
 
             {/* Results */}
             {results.length > 0 && (
-              <div className="mt-8">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-bold text-black">
+              <div className="mt-6 sm:mt-8">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3 sm:gap-0">
+                  <h2 className="text-xl sm:text-2xl font-bold text-black">
                     Results ({results.length} members)
                   </h2>
                   <button
                     onClick={handleDownload}
-                    className="bg-black text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-all duration-200 border-2 border-black"
+                    className="bg-black text-white py-2.5 sm:py-2 px-4 rounded-lg text-sm sm:text-base font-semibold hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-all duration-200 border-2 border-black touch-manipulation w-full sm:w-auto"
                   >
                     Download CSV
                   </button>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-black border-2 border-black">
-                    <thead className="bg-black text-white">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-white">
-                          IEEE Number
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-white">
-                          Name Initials
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-white">
-                          Status
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-white">
-                          Grade
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-white">
-                          Standards
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                          Societies
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-black">
-                      {results.map((result, idx) => (
-                        <tr key={idx} className={result.error ? 'bg-black text-white' : ''}>
-                          <td className="px-4 py-3 text-sm font-mono border-r border-black">{result.ieee_number}</td>
-                          <td className="px-4 py-3 text-sm border-r border-black">
-                            {result.name_initials || '-'}
-                          </td>
-                          <td className="px-4 py-3 text-sm border-r border-black">
-                            {result.membership_status ? (
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                  result.membership_status === 'Active'
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-red-600 text-white'
-                                }`}
-                              >
-                                {result.membership_status === 'Active' ? 'Active' : 'Not Active'}
-                              </span>
-                            ) : (
-                              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-red-600 text-white">
-                                Not Active
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-sm border-r border-black">
-                            {result.member_grade || '-'}
-                          </td>
-                          <td className="px-4 py-3 text-sm border-r border-black">
-                            {result.standards_association_member || '-'}
-                          </td>
-                          <td className="px-4 py-3 text-sm">
-                            {result.error ? (
-                              <span className="text-white">{result.error}</span>
-                            ) : (
-                              <div className="max-w-xs">
-                                {result.society_memberships ? (
-                                  <div className="text-xs">
-                                    {result.society_memberships.split(', ').map((soc, i) => (
-                                      <div key={i} className="mb-1">
-                                        • {soc}
-                                      </div>
-                                    ))}
-                                  </div>
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <div className="inline-block min-w-full align-middle">
+                    <div className="overflow-hidden border-2 border-black">
+                      <table className="min-w-full divide-y divide-black">
+                        <thead className="bg-black text-white">
+                          <tr>
+                            <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium uppercase tracking-wider border-r border-white">
+                              IEEE #
+                            </th>
+                            <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium uppercase tracking-wider border-r border-white">
+                              Name
+                            </th>
+                            <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium uppercase tracking-wider border-r border-white">
+                              Status
+                            </th>
+                            <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium uppercase tracking-wider border-r border-white hidden sm:table-cell">
+                              Grade
+                            </th>
+                            <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium uppercase tracking-wider border-r border-white hidden md:table-cell">
+                              Standards
+                            </th>
+                            <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium uppercase tracking-wider">
+                              Societies
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-black">
+                          {results.map((result, idx) => (
+                            <tr key={idx} className={result.error ? 'bg-black text-white' : ''}>
+                              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-mono border-r border-black whitespace-nowrap">{result.ieee_number}</td>
+                              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm border-r border-black">
+                                {result.name_initials || '-'}
+                              </td>
+                              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm border-r border-black">
+                                {result.membership_status ? (
+                                  <span
+                                    className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold whitespace-nowrap ${
+                                      result.membership_status === 'Active'
+                                        ? 'bg-green-600 text-white'
+                                        : 'bg-red-600 text-white'
+                                    }`}
+                                  >
+                                    {result.membership_status === 'Active' ? 'Active' : 'Not Active'}
+                                  </span>
                                 ) : (
-                                  '-'
+                                  <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-red-600 text-white whitespace-nowrap">
+                                    Not Active
+                                  </span>
                                 )}
-                              </div>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                              </td>
+                              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm border-r border-black hidden sm:table-cell">
+                                {result.member_grade || '-'}
+                              </td>
+                              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm border-r border-black hidden md:table-cell">
+                                {result.standards_association_member || '-'}
+                              </td>
+                              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
+                                {result.error ? (
+                                  <span className="text-white text-[10px] sm:text-xs">{result.error}</span>
+                                ) : (
+                                  <div className="max-w-xs">
+                                    {result.society_memberships ? (
+                                      <div className="text-[10px] sm:text-xs">
+                                        {result.society_memberships.split(', ').map((soc, i) => (
+                                          <div key={i} className="mb-0.5 sm:mb-1">
+                                            • {soc}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      '-'
+                                    )}
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
