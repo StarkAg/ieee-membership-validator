@@ -193,14 +193,33 @@ jobs:
                   sys.exit(1)
           EOF
 
+      - name: Check secrets are set
+        run: |
+          if [ -z "${{ secrets.IEEE_USERNAME }}" ] || [ -z "${{ secrets.IEEE_PASSWORD }}" ]; then
+            echo "❌ Error: IEEE_USERNAME and IEEE_PASSWORD secrets must be set in GitHub repository settings"
+            echo "Go to: Settings → Secrets and variables → Actions → New repository secret"
+            exit 1
+          fi
+          echo "✅ Secrets are configured"
+
       - name: Login and get cookie
         env:
           IEEE_USERNAME: ${{ secrets.IEEE_USERNAME }}
           IEEE_PASSWORD: ${{ secrets.IEEE_PASSWORD }}
         run: |
-          COOKIE=$(python /tmp/ieee_login.py)
+          set -e
+          echo "🔐 Logging into IEEE..."
+          COOKIE=$(python /tmp/ieee_login.py 2>&1)
+          if [ $? -ne 0 ]; then
+            echo "❌ Login failed. Check the error above."
+            exit 1
+          fi
+          if [ -z "$COOKIE" ]; then
+            echo "❌ Cookie is empty. Login may have failed."
+            exit 1
+          fi
           echo "COOKIE=$COOKIE" >> $GITHUB_ENV
-          echo "Cookie refreshed successfully"
+          echo "✅ Cookie refreshed successfully (length: ${#COOKIE} chars)"
 
       - name: Update web app cookie
         run: |
@@ -234,12 +253,19 @@ jobs:
           EOF
 
       - name: Commit and push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add app/page.tsx
-          git diff --staged --quiet || git commit -m "Auto-refresh cookie via GitHub Actions [skip ci]"
-          git push
+          if git diff --staged --quiet; then
+            echo "ℹ️  No changes to commit (cookie may be the same)"
+          else
+            git commit -m "Auto-refresh cookie via GitHub Actions [skip ci]"
+            git push
+            echo "✅ Changes committed and pushed"
+          fi
 
       - name: Summary
         run: |
