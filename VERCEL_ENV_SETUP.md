@@ -84,18 +84,54 @@ To verify it's working:
 
 ## Troubleshooting
 
+### Check if Environment Variables are Set
+
+**Use the diagnostic endpoint:**
+1. Visit: `https://your-app.vercel.app/api/check-env`
+2. This will show you:
+   - Whether `GITHUB_TOKEN` is set
+   - Whether `GITHUB_REPO` is set
+   - If the format is correct
+   - What might be missing
+
+**Common Issues:**
+
+**"GITHUB_TOKEN or GITHUB_REPO not configured" error:**
+1. ✅ **Verify in Vercel Dashboard:**
+   - Go to: Vercel Dashboard → Your Project → Settings → Environment Variables
+   - Make sure both `GITHUB_TOKEN` and `GITHUB_REPO` are listed
+   - Check that they're enabled for the correct environment (Production/Preview/Development)
+
+2. ✅ **Check for typos:**
+   - `GITHUB_TOKEN` (not `GITHUB_TOKEN_` or `GIT_TOKEN`)
+   - `GITHUB_REPO` (not `GITHUB_REPOSITORY` or `REPO`)
+
+3. ✅ **Redeploy after adding variables:**
+   - Environment variables only apply to NEW deployments
+   - Go to Deployments → Click "⋯" → "Redeploy"
+   - Or push a new commit to trigger a deployment
+
+4. ✅ **Check Vercel Function Logs:**
+   - Go to: Vercel Dashboard → Your Project → Functions
+   - Click on a recent function invocation
+   - Look for the warning message to see which variable is missing
+
 **Token not working?**
 - Make sure the token has the `workflow` scope checked
 - Verify the token hasn't expired
 - Check that the token has access to the repository
+- Token should start with `ghp_`
 
 **Workflow not triggering?**
 - Check Vercel function logs for errors
-- Verify `GITHUB_REPO` is exactly `StarkAg/ieee-membership-validator` (no extra spaces)
+- Verify `GITHUB_REPO` is exactly `StarkAg/ieee-membership-validator` (no extra spaces, no quotes)
 - Make sure the workflow file exists at `.github/workflows/refresh-cookie.yml`
+- Check GitHub Actions tab to see if workflow was triggered
 
 **Still having issues?**
+- Visit `/api/check-env` to see detailed diagnostic information
 - Check the Vercel deployment logs
 - Verify environment variables are set for the correct environment (Production/Preview/Development)
 - Make sure you redeployed after adding the variables
+- Try removing and re-adding the environment variables
 

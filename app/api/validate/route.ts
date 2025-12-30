@@ -367,7 +367,11 @@ export async function POST(request: NextRequest) {
             }
           }
         } else {
-          console.warn('GITHUB_TOKEN or GITHUB_REPO not configured - cannot auto-refresh cookie');
+          const missing = [];
+          if (!githubToken) missing.push('GITHUB_TOKEN');
+          if (!githubRepo) missing.push('GITHUB_REPO');
+          console.warn(`❌ ${missing.join(' and ')} not configured - cannot auto-refresh cookie`);
+          console.warn('To fix: Go to Vercel → Settings → Environment Variables and add:', missing.join(', '));
         }
       } catch (error) {
         console.error('Error triggering refresh workflow:', error);
