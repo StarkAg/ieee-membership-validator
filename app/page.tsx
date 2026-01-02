@@ -234,7 +234,7 @@ export default function Home() {
           </h1>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-4">
             <p className="text-xs sm:text-sm text-black opacity-70">
-              The validator takes approximately 2 minutes to fire up (refresh the Validator API)
+              Press the "Fire Up Validator API" button before validating. The validator takes approximately 2 minutes to fire up.
             </p>
             <button
               onClick={handleRefreshValidator}
