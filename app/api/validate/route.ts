@@ -249,6 +249,19 @@ class IEEEMembershipValidator {
         error: null,
       };
     } catch (error: any) {
+      // Check for 404 Not Found
+      if (error.response && error.response.status === 404) {
+        return {
+          ieee_number: memberNumber,
+          name_initials: null,
+          membership_status: null,
+          member_grade: null,
+          standards_association_member: null,
+          society_memberships: null,
+          error: '404 Not Found - Please click "Fire Up Validator API" before validating',
+        };
+      }
+      
       // Check for 401 Unauthorized (expired cookie)
       if (error.response && error.response.status === 401) {
         return {
