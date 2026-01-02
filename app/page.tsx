@@ -255,7 +255,7 @@ export default function Home() {
 
           <div className="space-y-6">
             {/* Cookie Input */}
-            <div>
+            <div className="hidden">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-1 sm:gap-0">
                 <label htmlFor="cookie" className="block text-xs sm:text-sm font-medium text-black">
                   Authentication Cookie (PA.Global_Websession)
