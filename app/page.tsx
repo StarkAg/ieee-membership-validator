@@ -25,6 +25,8 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [cookieLocked, setCookieLocked] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
 
   const handleValidate = async () => {
     if (!cookie.trim()) {
@@ -163,6 +165,31 @@ export default function Home() {
     window.URL.revokeObjectURL(url);
   };
 
+  const handleRefreshValidator = async () => {
+    setRefreshing(true);
+    setRefreshMessage(null);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/trigger-refresh', {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to trigger refresh');
+      }
+
+      setRefreshMessage('✅ Validator API refresh triggered! It will take approximately 2 minutes to complete.');
+    } catch (err: any) {
+      setError(err.message || 'Failed to trigger validator refresh');
+      setRefreshMessage(null);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
@@ -205,6 +232,23 @@ export default function Home() {
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-2">
             IEEE Membership Validator
           </h1>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-4">
+            <p className="text-xs sm:text-sm text-black opacity-70">
+              The validator takes approximately 2 minutes to fire up (refresh the Validator API)
+            </p>
+            <button
+              onClick={handleRefreshValidator}
+              disabled={refreshing}
+              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-black text-white text-xs sm:text-sm font-medium rounded hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+            >
+              {refreshing ? 'Refreshing...' : 'Fire Up Validator API'}
+            </button>
+          </div>
+          {refreshMessage && (
+            <div className="mb-4 p-2 sm:p-3 bg-green-50 border border-green-200 rounded text-xs sm:text-sm text-green-800">
+              {refreshMessage}
+            </div>
+          )}
           <p className="text-sm sm:text-base text-black mb-6 sm:mb-8 opacity-70">
             Bulk validate IEEE membership numbers and extract membership details
           </p>
