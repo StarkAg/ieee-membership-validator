@@ -389,9 +389,31 @@ export default function Home() {
             <button
               onClick={handleRefreshValidator}
               disabled={refreshing}
-              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-black text-white text-xs sm:text-sm font-medium rounded hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+              className="relative px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-black via-gray-900 to-black text-white text-xs sm:text-sm font-medium rounded-lg overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 whitespace-nowrap shadow-lg hover:shadow-xl hover:shadow-white/10 hover:scale-105 active:scale-100 disabled:hover:scale-100 disabled:hover:shadow-lg group border border-white/10 hover:border-white/20"
             >
-              {refreshing ? 'Refreshing...' : 'Fire Up Validator API'}
+              {/* Continuous subtle shimmer effect */}
+              <span className="absolute inset-0 shimmer-effect bg-gradient-to-r from-transparent via-white/5 to-transparent"></span>
+              
+              {/* Shine effect on hover */}
+              <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/15 to-transparent"></span>
+              
+              {/* Subtle glow effect */}
+              <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+              
+              {/* Button text */}
+              <span className="relative z-10 flex items-center gap-1.5">
+                {refreshing ? (
+                  <>
+                    <span className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    Refreshing...
+                  </>
+                ) : (
+                  <>
+                    <span className="text-yellow-300">⚡</span>
+                    Fire Up Validator API
+                  </>
+                )}
+              </span>
             </button>
           </div>
           {refreshMessage && (

@@ -24,3 +24,17 @@ body {
   color: #000000;
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Shimmer animation for Fire Up button */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer-effect {
+  animation: shimmer 3s infinite;
+}
