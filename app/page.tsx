@@ -318,35 +318,8 @@ export default function Home() {
       {/* Header */}
       <header className="w-full border-b-2 border-white bg-black py-3 px-3 sm:py-4 sm:px-6 lg:px-8">
         <div className="w-full flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="text-white opacity-70 text-xs sm:text-sm font-mono">
-              {APP_VERSION}
-            </div>
-            <button
-              onClick={() => checkDeploymentStatus(false)}
-              disabled={checkingDeployment}
-              className="text-white opacity-70 hover:opacity-100 text-[10px] sm:text-xs font-mono px-2 py-1 border border-white/30 rounded hover:border-white/50 transition-all disabled:opacity-50"
-              title="Check deployment status"
-            >
-              {checkingDeployment ? 'Checking...' : 'Check Deploy'}
-            </button>
-            {deploymentStatus && (
-              <div className={`text-[10px] sm:text-xs font-mono px-2 py-1 rounded ${
-                deploymentStatus.isReady 
-                  ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                  : deploymentStatus.isBuilding
-                  ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                  : deploymentStatus.isError
-                  ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                  : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
-              }`}>
-                {deploymentStatus.state === 'READY' ? '✅ Ready' :
-                 deploymentStatus.state === 'BUILDING' || deploymentStatus.state === 'QUEUED' ? '⏳ Building' :
-                 deploymentStatus.state === 'ERROR' ? '❌ Error' :
-                 deploymentStatus.state === 'NOT_CONFIGURED' ? '⚙️ Not Configured' :
-                 deploymentStatus.state}
-              </div>
-            )}
+          <div className="text-white opacity-70 text-xs sm:text-sm font-mono">
+            {APP_VERSION}
           </div>
           <div className="flex items-center gap-1.5 sm:gap-3">
             <p className="text-white opacity-70 text-[10px] sm:text-xs md:text-sm font-bold whitespace-nowrap">
