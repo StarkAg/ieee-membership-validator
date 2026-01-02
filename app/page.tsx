@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import packageJson from '../package.json';
 
 interface ValidationResult {
@@ -36,6 +36,8 @@ export default function Home() {
     url: string | null;
   } | null>(null);
   const [checkingDeployment, setCheckingDeployment] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState<string>('');
 
   const handleValidate = async () => {
     // Check if validator needs to be fired up first
@@ -209,6 +211,11 @@ export default function Home() {
       if (countdown === 0) {
         setCountdown(null);
         setRefreshMessage('✅ Validator API is ready! You can now start validating.');
+        // Show popup when countdown finishes
+        setPopupMessage('✅ Validator API is ready! You can now start validating.');
+        setShowPopup(true);
+        // Auto-check deployment status when countdown ends
+        checkDeploymentStatus(false);
       }
       return;
     }
@@ -220,20 +227,29 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [countdown]);
 
-  const checkDeploymentStatus = async () => {
+  const checkDeploymentStatus = useCallback(async (suspendCountdownOnReady = false) => {
     setCheckingDeployment(true);
     try {
       const response = await fetch('/api/deployment-status');
       const data = await response.json();
       
       if (data.available && data.deployment) {
-        setDeploymentStatus({
+        const status = {
           state: data.deployment.state,
           isReady: data.isReady,
           isBuilding: data.isBuilding,
           isError: data.isError,
           url: data.deployment.url || null,
-        });
+        };
+        setDeploymentStatus(status);
+        
+        // If deployment is ready, show popup and suspend countdown if requested
+        if (data.isReady && suspendCountdownOnReady) {
+          setCountdown(null); // Suspend countdown
+          setPopupMessage('🎉 Deployment is ready! Validator API is now available.');
+          setShowPopup(true);
+          setRefreshMessage('✅ Deployment is ready! Validator API is now available.');
+        }
       } else {
         setDeploymentStatus({
           state: 'NOT_CONFIGURED',
@@ -254,10 +270,51 @@ export default function Home() {
     } finally {
       setCheckingDeployment(false);
     }
-  };
+  }, []);
+
+  // Monitor countdown and check deployment status periodically
+  useEffect(() => {
+    if (countdown === null || countdown <= 0) return;
+
+    // Check deployment status every 10 seconds when countdown is active
+    const interval = setInterval(() => {
+      checkDeploymentStatus(true); // Suspend countdown if deployment is ready
+    }, 10000); // Check every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [countdown, checkDeploymentStatus]);
 
   return (
     <div className="min-h-screen bg-black">
+      {/* Popup Modal */}
+      {showPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-2xl p-6 sm:p-8 max-w-md w-full mx-4 border-2 border-black">
+            <div className="flex items-start justify-between mb-4">
+              <h2 className="text-xl sm:text-2xl font-bold text-black">
+                Deployment Status
+              </h2>
+              <button
+                onClick={() => setShowPopup(false)}
+                className="text-black opacity-60 hover:opacity-100 transition-opacity text-2xl leading-none"
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <p className="text-sm sm:text-base text-black mb-6">
+              {popupMessage}
+            </p>
+            <button
+              onClick={() => setShowPopup(false)}
+              className="w-full px-4 py-2.5 bg-black text-white font-medium rounded hover:bg-gray-800 transition-colors text-sm sm:text-base"
+            >
+              Got it!
+            </button>
+          </div>
+        </div>
+      )}
+      
       {/* Header */}
       <header className="w-full border-b-2 border-white bg-black py-3 px-3 sm:py-4 sm:px-6 lg:px-8">
         <div className="w-full flex items-center justify-between">
