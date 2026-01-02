@@ -323,7 +323,7 @@ export default function Home() {
               {APP_VERSION}
             </div>
             <button
-              onClick={checkDeploymentStatus}
+              onClick={() => checkDeploymentStatus(false)}
               disabled={checkingDeployment}
               className="text-white opacity-70 hover:opacity-100 text-[10px] sm:text-xs font-mono px-2 py-1 border border-white/30 rounded hover:border-white/50 transition-all disabled:opacity-50"
               title="Check deployment status"
