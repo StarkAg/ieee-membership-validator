@@ -164,7 +164,8 @@ export default function Home() {
       }
     } catch (err) {
       // Only show errors if we have no results or all results have errors
-      const hasSuccessfulResults = allResults.length > 0 && allResults.some((r: ValidationResult) => !r.error);
+      // Use results state instead of allResults since it's updated throughout the try block
+      const hasSuccessfulResults = results.length > 0 && results.some((r: ValidationResult) => !r.error);
       
       if (!hasSuccessfulResults) {
         const errorMessage = err instanceof Error ? err.message : 'An error occurred';
