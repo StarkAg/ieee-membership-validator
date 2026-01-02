@@ -15,6 +15,18 @@ This document shows how errors are handled throughout the IEEE Membership Valida
         │  Pre-Validation Checks               │
         └─────────────────────────────────────┘
                               │
+                              ▼
+                ┌───────────────────────┐
+                │ Empty Membership IDs? │
+                └───────────────────────┘
+                            │
+                            ▼
+                    ⚠️ Message:
+                    "Please enter at
+                    least 1 membership
+                    number"
+                            │
+                            ▼
         ┌─────────────────────┴─────────────────────┐
         │                                           │
         ▼                                           ▼
@@ -29,17 +41,6 @@ This document shows how errors are handled throughout the IEEE Membership Valida
    validator to finish"                      Fire Up Validator"
         │                                           │
         └───────────────────┬───────────────────────┘
-                            │
-                            ▼
-                ┌───────────────────────┐
-                │ Empty Membership IDs? │
-                └───────────────────────┘
-                            │
-                            ▼
-                    ⚠️ Message:
-                    "Please enter at
-                    least 1 membership
-                    number"
                             │
                             ▼
         ┌───────────────────────────────────┐

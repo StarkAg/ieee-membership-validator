@@ -40,17 +40,7 @@ export default function Home() {
   const [popupMessage, setPopupMessage] = useState<string>('');
 
   const handleValidate = async () => {
-    // Check if validator needs to be fired up first
-    if (countdown !== null && countdown > 0) {
-      setRefreshMessage('⏳ Please wait for the validator to finish starting up. Click "Fire Up Validator API" if you haven\'t already.');
-      return;
-    }
-
-    if (countdown === null && !refreshMessage) {
-      setRefreshMessage('⚠️ Please click "Fire Up Validator API" before validating.');
-      return;
-    }
-
+    // First check: Empty membership IDs
     if (!membershipIds.trim()) {
       setRefreshMessage('⚠️ Please enter at least 1 membership number.');
       return;
@@ -64,6 +54,17 @@ export default function Home() {
 
     if (ids.length === 0) {
       setRefreshMessage('⚠️ Please enter at least 1 membership number.');
+      return;
+    }
+
+    // Second check: Validator needs to be fired up
+    if (countdown !== null && countdown > 0) {
+      setRefreshMessage('⏳ Please wait for the validator to finish starting up. Click "Fire Up Validator API" if you haven\'t already.');
+      return;
+    }
+
+    if (countdown === null && !refreshMessage) {
+      setRefreshMessage('⚠️ Please click "Fire Up Validator API" before validating.');
       return;
     }
 
