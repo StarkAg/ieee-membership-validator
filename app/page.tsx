@@ -105,7 +105,7 @@ export default function Home() {
         setCookieLocked(false); // Unlock cookie input on session error
         if (data.refreshTriggered) {
           setRefreshMessage('🔄 Session expired. Cookie refresh workflow has been automatically triggered. Please wait and try again.');
-          setCountdown(120); // Restart countdown
+          setCountdown(90); // Restart countdown (1.5 minutes)
         } else {
           setRefreshMessage('⚠️ Session expired. Please click "Fire Up Validator API" to refresh.');
         }
@@ -195,8 +195,8 @@ export default function Home() {
         throw new Error(data.error || 'Failed to trigger refresh');
       }
 
-      setRefreshMessage('✅ Validator API refresh triggered! It will take approximately 2 minutes to complete.');
-      setCountdown(120); // Start 2-minute countdown (120 seconds)
+      setRefreshMessage('✅ Validator API refresh triggered! It will take approximately 1.5 minutes to complete.');
+      setCountdown(90); // Start 1.5-minute countdown (90 seconds)
     } catch (err: any) {
       setRefreshMessage('⚠️ Failed to trigger refresh. Please try again.');
       setCountdown(null);
@@ -384,7 +384,7 @@ export default function Home() {
           </h1>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-4">
             <p className="text-xs sm:text-sm text-black opacity-70">
-              Press the "Fire Up Validator API" button before validating. The validator takes approximately 2 minutes to fire up.
+              Press the "Fire Up Validator API" button before validating. The validator takes approximately 1.5 minutes to fire up.
             </p>
             <button
               onClick={handleRefreshValidator}
