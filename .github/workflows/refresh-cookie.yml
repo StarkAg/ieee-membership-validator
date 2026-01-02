@@ -1,10 +1,7 @@
 name: Refresh IEEE Cookie
 
 on:
-  schedule:
-    # Run every 6 hours (at minute 0 of every 6th hour)
-    - cron: '0 */6 * * *'
-  workflow_dispatch: # Allow manual trigger
+  workflow_dispatch: # Allow manual trigger and API-triggered runs
 
 jobs:
   refresh-cookie:
