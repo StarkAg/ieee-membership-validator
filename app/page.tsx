@@ -337,7 +337,7 @@ export default function Home() {
       )}
       
       {/* Header */}
-      <header className="w-full border-b-2 border-white bg-black py-3 px-3 sm:py-4 sm:px-6 lg:px-8">
+      <header className="w-full border-b border-white bg-black py-3 px-3 sm:py-4 sm:px-6 lg:px-8">
         <div className="w-full flex items-center justify-between">
           <div className="text-white opacity-70 text-xs sm:text-sm font-mono">
             {APP_VERSION}
@@ -532,7 +532,7 @@ export default function Home() {
 
                 <div className="overflow-x-auto -mx-4 sm:mx-0">
                   <div className="inline-block min-w-full align-middle">
-                    <div className="overflow-hidden border-2 border-black">
+                    <div className="overflow-hidden border-2 border-black rounded-lg">
                       <table className="min-w-full divide-y divide-black">
                         <thead className="bg-black text-white">
                           <tr>
