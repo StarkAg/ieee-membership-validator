@@ -52,6 +52,7 @@ export default function Home() {
     }
 
     if (!membershipIds.trim()) {
+      setRefreshMessage('⚠️ Please enter at least 1 membership number.');
       return;
     }
 
@@ -62,6 +63,7 @@ export default function Home() {
       .filter(id => id.length > 0);
 
     if (ids.length === 0) {
+      setRefreshMessage('⚠️ Please enter at least 1 membership number.');
       return;
     }
 
@@ -90,6 +92,12 @@ export default function Home() {
         });
 
         if (!response.ok) {
+          // Check for 404 error
+          if (response.status === 404) {
+            setRefreshMessage('⚠️ Please click "Fire Up Validator API" before validating.');
+            setLoading(false);
+            return;
+          }
           const errorData = await response.json();
           throw new Error(errorData.error || 'Validation failed');
         }
@@ -128,9 +136,11 @@ export default function Home() {
 
       setProgress({ current: allResults.length, total: ids.length });
     } catch (err) {
-      // Silently handle errors - don't show error messages
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      if (errorMessage.includes('Session') || errorMessage.includes('Cookie') || errorMessage.includes('401') || errorMessage.includes('403')) {
+      // Check for 404 errors
+      if (errorMessage.includes('404') || errorMessage.includes('Not Found')) {
+        setRefreshMessage('⚠️ Please click "Fire Up Validator API" before validating.');
+      } else if (errorMessage.includes('Session') || errorMessage.includes('Cookie') || errorMessage.includes('401') || errorMessage.includes('403')) {
         setCookieLocked(false);
         setRefreshMessage('⚠️ Please click "Fire Up Validator API" to refresh the session.');
       }
