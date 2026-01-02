@@ -30,13 +30,18 @@ export default function Home() {
   const [countdown, setCountdown] = useState<number | null>(null);
 
   const handleValidate = async () => {
-    if (!cookie.trim()) {
-      setError('Please enter your authentication cookie');
+    // Check if validator needs to be fired up first
+    if (countdown !== null && countdown > 0) {
+      setRefreshMessage('⏳ Please wait for the validator to finish starting up. Click "Fire Up Validator API" if you haven\'t already.');
+      return;
+    }
+
+    if (countdown === null && !refreshMessage) {
+      setRefreshMessage('⚠️ Please click "Fire Up Validator API" before validating.');
       return;
     }
 
     if (!membershipIds.trim()) {
-      setError('Please enter at least one membership ID');
       return;
     }
 
@@ -47,7 +52,6 @@ export default function Home() {
       .filter(id => id.length > 0);
 
     if (ids.length === 0) {
-      setError('Please enter at least one valid membership ID');
       return;
     }
 
@@ -89,13 +93,12 @@ export default function Home() {
       
       if (hasSessionError) {
         setCookieLocked(false); // Unlock cookie input on session error
-        let errorMsg = 'Session expired or cookie invalid (401/403). ';
         if (data.refreshTriggered) {
-          errorMsg += 'Cookie refresh workflow has been automatically triggered. The cookie will be updated shortly.';
+          setRefreshMessage('🔄 Session expired. Cookie refresh workflow has been automatically triggered. Please wait and try again.');
+          setCountdown(120); // Restart countdown
         } else {
-          errorMsg += 'Please update your cookie and try again.';
+          setRefreshMessage('⚠️ Session expired. Please click "Fire Up Validator API" to refresh.');
         }
-        setError(errorMsg);
         break;
       }
       
@@ -115,11 +118,11 @@ export default function Home() {
 
       setProgress({ current: allResults.length, total: ids.length });
     } catch (err) {
+      // Silently handle errors - don't show error messages
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      setError(errorMessage);
-      // Unlock cookie input on any error
       if (errorMessage.includes('Session') || errorMessage.includes('Cookie') || errorMessage.includes('401') || errorMessage.includes('403')) {
         setCookieLocked(false);
+        setRefreshMessage('⚠️ Please click "Fire Up Validator API" to refresh the session.');
       }
     } finally {
       setLoading(false);
@@ -185,8 +188,7 @@ export default function Home() {
       setRefreshMessage('✅ Validator API refresh triggered! It will take approximately 2 minutes to complete.');
       setCountdown(120); // Start 2-minute countdown (120 seconds)
     } catch (err: any) {
-      setError(err.message || 'Failed to trigger validator refresh');
-      setRefreshMessage(null);
+      setRefreshMessage('⚠️ Failed to trigger refresh. Please try again.');
       setCountdown(null);
     } finally {
       setRefreshing(false);
@@ -265,11 +267,19 @@ export default function Home() {
             </button>
           </div>
           {refreshMessage && (
-            <div className="mb-4 p-2 sm:p-3 bg-green-50 border border-green-200 rounded text-xs sm:text-sm text-green-800">
-              <div className="flex items-center gap-2">
+            <div className={`mb-4 p-2 sm:p-3 rounded text-xs sm:text-sm ${
+              refreshMessage.startsWith('✅') 
+                ? 'bg-green-50 border border-green-200 text-green-800'
+                : refreshMessage.startsWith('⏳')
+                ? 'bg-yellow-50 border border-yellow-200 text-yellow-800'
+                : 'bg-orange-50 border border-orange-200 text-orange-800'
+            }`}>
+              <div className="flex items-center gap-2 flex-wrap">
                 <span>{refreshMessage}</span>
                 {countdown !== null && countdown > 0 && (
-                  <span className="font-mono font-bold text-green-900">
+                  <span className={`font-mono font-bold ${
+                    refreshMessage.startsWith('✅') ? 'text-green-900' : 'text-yellow-900'
+                  }`}>
                     ({Math.floor(countdown / 60)}:{(countdown % 60).toString().padStart(2, '0')})
                   </span>
                 )}
@@ -333,13 +343,6 @@ export default function Home() {
                 Enter IEEE member numbers (8-9 digits) or email addresses, one per line
               </p>
             </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="bg-black border-2 border-black text-white px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm">
-                {error}
-              </div>
-            )}
 
             {/* Progress */}
             {loading && (
