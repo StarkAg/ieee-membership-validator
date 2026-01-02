@@ -104,6 +104,16 @@ export default function Home() {
 
       const data = await response.json();
       
+      // Check if any result has a 404 error
+      const has404Error = data.results.some((r: ValidationResult) => 
+        r.error && (r.error.includes('404') || r.error.includes('Not Found') || r.error.includes('Fire Up Validator'))
+      );
+      
+      if (has404Error) {
+        setRefreshMessage('⚠️ Please click "Fire Up Validator API" before validating.');
+        break;
+      }
+      
       // Check if any result has a session expired or 401 error
       const hasSessionError = data.results.some((r: ValidationResult) => 
         r.error && (r.error.includes('Session expired') || r.error.includes('401') || r.error.includes('403'))
