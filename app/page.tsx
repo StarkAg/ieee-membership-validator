@@ -105,35 +105,46 @@ export default function Home() {
 
       const data = await response.json();
       
-      // Check if any result has a 404 error
-      const has404Error = data.results.some((r: ValidationResult) => 
-        r.error && (r.error.includes('404') || r.error.includes('Not Found') || r.error.includes('Fire Up Validator'))
-      );
+      // Check if there are any successful results (results without errors)
+      const hasSuccessfulResults = data.results.some((r: ValidationResult) => !r.error);
       
-      if (has404Error) {
-        setRefreshMessage('⚠️ Please click "Fire Up Validator API" before validating.');
-        break;
-      }
-      
-      // Check if any result has a session expired or 401 error
-      const hasSessionError = data.results.some((r: ValidationResult) => 
-        r.error && (r.error.includes('Session expired') || r.error.includes('401') || r.error.includes('403'))
-      );
-      
-      if (hasSessionError) {
-        setCookieLocked(false); // Unlock cookie input on session error
-        if (data.refreshTriggered) {
-          setRefreshMessage('🔄 Session expired. Cookie refresh workflow has been automatically triggered. Please wait and try again.');
-          setCountdown(90); // Restart countdown (1.5 minutes)
-        } else {
-          setRefreshMessage('⚠️ Session expired. Please click "Fire Up Validator API" to refresh.');
+      // Only show errors if there are no successful results
+      if (!hasSuccessfulResults) {
+        // Check if any result has a 404 error
+        const has404Error = data.results.some((r: ValidationResult) => 
+          r.error && (r.error.includes('404') || r.error.includes('Not Found') || r.error.includes('Fire Up Validator'))
+        );
+        
+        if (has404Error) {
+          setRefreshMessage('⚠️ Please click "Fire Up Validator API" before validating.');
+          break;
         }
-        break;
+        
+        // Check if any result has a session expired or 401 error
+        const hasSessionError = data.results.some((r: ValidationResult) => 
+          r.error && (r.error.includes('Session expired') || r.error.includes('401') || r.error.includes('403'))
+        );
+        
+        if (hasSessionError) {
+          setCookieLocked(false); // Unlock cookie input on session error
+          if (data.refreshTriggered) {
+            setRefreshMessage('🔄 Session expired. Cookie refresh workflow has been automatically triggered. Please wait and try again.');
+            setCountdown(90); // Restart countdown (1.5 minutes)
+          } else {
+            setRefreshMessage('⚠️ Session expired. Please click "Fire Up Validator API" to refresh.');
+          }
+          break;
+        }
       }
       
       allResults.push(...data.results);
       setResults([...allResults]);
       setProgress({ current: allResults.length, total: ids.length });
+      
+      // Clear error messages if we have successful results
+      if (hasSuccessfulResults) {
+        setRefreshMessage(null);
+      }
 
       if (!data.hasMore) {
         break;
@@ -146,14 +157,24 @@ export default function Home() {
     }
 
       setProgress({ current: allResults.length, total: ids.length });
+      
+      // Clear error messages if we have any successful results
+      if (allResults.length > 0 && allResults.some((r: ValidationResult) => !r.error)) {
+        setRefreshMessage(null);
+      }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      // Check for 404 errors
-      if (errorMessage.includes('404') || errorMessage.includes('Not Found')) {
-        setRefreshMessage('⚠️ Please click "Fire Up Validator API" before validating.');
-      } else if (errorMessage.includes('Session') || errorMessage.includes('Cookie') || errorMessage.includes('401') || errorMessage.includes('403')) {
-        setCookieLocked(false);
-        setRefreshMessage('⚠️ Please click "Fire Up Validator API" to refresh the session.');
+      // Only show errors if we have no results or all results have errors
+      const hasSuccessfulResults = allResults.length > 0 && allResults.some((r: ValidationResult) => !r.error);
+      
+      if (!hasSuccessfulResults) {
+        const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+        // Check for 404 errors
+        if (errorMessage.includes('404') || errorMessage.includes('Not Found')) {
+          setRefreshMessage('⚠️ Please click "Fire Up Validator API" before validating.');
+        } else if (errorMessage.includes('Session') || errorMessage.includes('Cookie') || errorMessage.includes('401') || errorMessage.includes('403')) {
+          setCookieLocked(false);
+          setRefreshMessage('⚠️ Please click "Fire Up Validator API" to refresh the session.');
+        }
       }
     } finally {
       setLoading(false);
