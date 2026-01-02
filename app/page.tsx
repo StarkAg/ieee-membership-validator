@@ -28,6 +28,14 @@ export default function Home() {
   const [refreshing, setRefreshing] = useState(false);
   const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [deploymentStatus, setDeploymentStatus] = useState<{
+    state: string | null;
+    isReady: boolean;
+    isBuilding: boolean;
+    isError: boolean;
+    url: string | null;
+  } | null>(null);
+  const [checkingDeployment, setCheckingDeployment] = useState(false);
 
   const handleValidate = async () => {
     // Check if validator needs to be fired up first
@@ -212,13 +220,76 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [countdown]);
 
+  const checkDeploymentStatus = async () => {
+    setCheckingDeployment(true);
+    try {
+      const response = await fetch('/api/deployment-status');
+      const data = await response.json();
+      
+      if (data.available && data.deployment) {
+        setDeploymentStatus({
+          state: data.deployment.state,
+          isReady: data.isReady,
+          isBuilding: data.isBuilding,
+          isError: data.isError,
+          url: data.deployment.url || null,
+        });
+      } else {
+        setDeploymentStatus({
+          state: 'NOT_CONFIGURED',
+          isReady: false,
+          isBuilding: false,
+          isError: false,
+          url: null,
+        });
+      }
+    } catch (err) {
+      setDeploymentStatus({
+        state: 'ERROR',
+        isReady: false,
+        isBuilding: false,
+        isError: true,
+        url: null,
+      });
+    } finally {
+      setCheckingDeployment(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
       <header className="w-full border-b-2 border-white bg-black py-3 px-3 sm:py-4 sm:px-6 lg:px-8">
         <div className="w-full flex items-center justify-between">
-          <div className="text-white opacity-70 text-xs sm:text-sm font-mono">
-            {APP_VERSION}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="text-white opacity-70 text-xs sm:text-sm font-mono">
+              {APP_VERSION}
+            </div>
+            <button
+              onClick={checkDeploymentStatus}
+              disabled={checkingDeployment}
+              className="text-white opacity-70 hover:opacity-100 text-[10px] sm:text-xs font-mono px-2 py-1 border border-white/30 rounded hover:border-white/50 transition-all disabled:opacity-50"
+              title="Check deployment status"
+            >
+              {checkingDeployment ? 'Checking...' : 'Check Deploy'}
+            </button>
+            {deploymentStatus && (
+              <div className={`text-[10px] sm:text-xs font-mono px-2 py-1 rounded ${
+                deploymentStatus.isReady 
+                  ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                  : deploymentStatus.isBuilding
+                  ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                  : deploymentStatus.isError
+                  ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                  : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+              }`}>
+                {deploymentStatus.state === 'READY' ? '✅ Ready' :
+                 deploymentStatus.state === 'BUILDING' || deploymentStatus.state === 'QUEUED' ? '⏳ Building' :
+                 deploymentStatus.state === 'ERROR' ? '❌ Error' :
+                 deploymentStatus.state === 'NOT_CONFIGURED' ? '⚙️ Not Configured' :
+                 deploymentStatus.state}
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-1.5 sm:gap-3">
             <p className="text-white opacity-70 text-[10px] sm:text-xs md:text-sm font-bold whitespace-nowrap">
