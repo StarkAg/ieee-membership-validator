@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import packageJson from '../package.json';
 
 interface ValidationResult {
@@ -27,6 +27,7 @@ export default function Home() {
   const [cookieLocked, setCookieLocked] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
 
   const handleValidate = async () => {
     if (!cookie.trim()) {
@@ -182,13 +183,32 @@ export default function Home() {
       }
 
       setRefreshMessage('✅ Validator API refresh triggered! It will take approximately 2 minutes to complete.');
+      setCountdown(120); // Start 2-minute countdown (120 seconds)
     } catch (err: any) {
       setError(err.message || 'Failed to trigger validator refresh');
       setRefreshMessage(null);
+      setCountdown(null);
     } finally {
       setRefreshing(false);
     }
   };
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (countdown === null || countdown <= 0) {
+      if (countdown === 0) {
+        setCountdown(null);
+        setRefreshMessage('✅ Validator API is ready! You can now start validating.');
+      }
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setCountdown(countdown - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [countdown]);
 
   return (
     <div className="min-h-screen bg-black">
@@ -246,7 +266,14 @@ export default function Home() {
           </div>
           {refreshMessage && (
             <div className="mb-4 p-2 sm:p-3 bg-green-50 border border-green-200 rounded text-xs sm:text-sm text-green-800">
-              {refreshMessage}
+              <div className="flex items-center gap-2">
+                <span>{refreshMessage}</span>
+                {countdown !== null && countdown > 0 && (
+                  <span className="font-mono font-bold text-green-900">
+                    ({Math.floor(countdown / 60)}:{(countdown % 60).toString().padStart(2, '0')})
+                  </span>
+                )}
+              </div>
             </div>
           )}
           <p className="text-sm sm:text-base text-black mb-6 sm:mb-8 opacity-70">
