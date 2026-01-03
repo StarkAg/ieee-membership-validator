@@ -17,7 +17,7 @@ class IEEEMembershipValidator {
   private cookie: string;
   public delay: number;
 
-  constructor(cookie: string, delay: number = 700) {
+  constructor(cookie: string, delay: number = 1) {
     this.baseUrl = 'https://services24.ieee.org/membership-validator.html';
     this.cookie = cookie;
     this.delay = delay; // milliseconds - configurable delay
@@ -308,7 +308,7 @@ class IEEEMembershipValidator {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { cookie, membershipIds, batchStart = 0, batchSize = 10, requestDelay = 700 } = body;
+    const { cookie, membershipIds, batchStart = 0, batchSize = 50, requestDelay = 1 } = body;
 
     if (!cookie) {
       return NextResponse.json({ error: 'Cookie is required' }, { status: 400 });
@@ -318,8 +318,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Membership IDs are required' }, { status: 400 });
     }
 
-    // Validate and clamp requestDelay to reasonable bounds
-    const delay = Math.max(0, Math.min(5000, parseInt(String(requestDelay)) || 700));
+    // Validate and clamp requestDelay to reasonable bounds (minimum 1ms for speed)
+    const delay = Math.max(1, Math.min(5000, parseInt(String(requestDelay)) || 1));
     const actualBatchSize = Math.max(1, Math.min(50, parseInt(String(batchSize)) || 10));
 
     console.log('⚙️ Backend received settings:', { 

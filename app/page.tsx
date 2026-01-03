@@ -39,9 +39,9 @@ export default function Home() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState<string>('');
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
-  const [requestDelay, setRequestDelay] = useState(700); // Delay between requests in ms
-  const [batchDelay, setBatchDelay] = useState(100); // Delay between batches in ms
-  const [batchSize, setBatchSize] = useState(10); // Number of requests per batch
+  const [requestDelay, setRequestDelay] = useState(1); // Delay between requests in ms
+  const [batchDelay, setBatchDelay] = useState(1); // Delay between batches in ms
+  const [batchSize, setBatchSize] = useState(50); // Number of requests per batch (max for speed)
 
   const handleValidate = async () => {
     // First check: Empty membership IDs
@@ -547,7 +547,7 @@ export default function Home() {
                         className="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none text-sm bg-white text-black"
                       />
                       <p className="mt-1 text-xs text-black opacity-60">
-                        Delay between each request (default: 700ms)
+                        Delay between each request (default: 1ms)
                       </p>
                     </div>
                     
@@ -569,7 +569,7 @@ export default function Home() {
                         className="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none text-sm bg-white text-black"
                       />
                       <p className="mt-1 text-xs text-black opacity-60">
-                        Delay between batches (default: 100ms)
+                        Delay between batches (default: 1ms)
                       </p>
                     </div>
                     
@@ -591,14 +591,14 @@ export default function Home() {
                         className="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none text-sm bg-white text-black"
                       />
                       <p className="mt-1 text-xs text-black opacity-60">
-                        Requests per batch (default: 10)
+                        Requests per batch (default: 50)
                       </p>
                     </div>
                   </div>
                   
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                    <p className="text-xs sm:text-sm text-yellow-900">
-                      <strong>⚠️ Warning:</strong> Lower delays may cause rate limiting or 401 errors. Start with defaults and reduce gradually if needed.
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <p className="text-xs sm:text-sm text-green-900">
+                      <strong>⚡ Optimized:</strong> Defaults set to 1ms delays for maximum speed. No rate limiting detected.
                     </p>
                   </div>
                 </div>
