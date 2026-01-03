@@ -15,7 +15,7 @@ interface ValidationResult {
 class IEEEMembershipValidator {
   private baseUrl: string;
   private cookie: string;
-  private delay: number;
+  public delay: number;
 
   constructor(cookie: string, delay: number = 700) {
     this.baseUrl = 'https://services24.ieee.org/membership-validator.html';
