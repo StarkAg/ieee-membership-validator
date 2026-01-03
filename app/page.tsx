@@ -38,6 +38,10 @@ export default function Home() {
   const [checkingDeployment, setCheckingDeployment] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState<string>('');
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
+  const [requestDelay, setRequestDelay] = useState(700); // Delay between requests in ms
+  const [batchDelay, setBatchDelay] = useState(100); // Delay between batches in ms
+  const [batchSize, setBatchSize] = useState(10); // Number of requests per batch
 
   const handleValidate = async () => {
     // First check: Empty membership IDs
@@ -65,7 +69,6 @@ export default function Home() {
 
     try {
       const allResults: ValidationResult[] = [];
-      const batchSize = 10; // Process 10 at a time to avoid timeout
       let batchStart = 0;
 
       while (batchStart < ids.length) {
@@ -79,6 +82,7 @@ export default function Home() {
             membershipIds: ids,
             batchStart,
             batchSize,
+            requestDelay,
           }),
         });
 
@@ -142,8 +146,10 @@ export default function Home() {
 
         batchStart = data.batchEnd;
         
-        // Small delay between batches
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Delay between batches
+        if (batchStart < ids.length) {
+          await new Promise(resolve => setTimeout(resolve, batchDelay));
+        }
     }
 
       setProgress({ current: allResults.length, total: ids.length });
@@ -497,7 +503,88 @@ export default function Home() {
               />
               <p className="mt-2 text-xs sm:text-sm text-black opacity-60">
                 Enter IEEE member numbers (8-9 digits) or email addresses, one per line
-              </p>
+          </p>
+        </div>
+
+            {/* Advanced Settings */}
+            <div className="border-2 border-black rounded-lg p-3 sm:p-4 bg-gray-50">
+              <button
+                type="button"
+                onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
+                className="w-full flex items-center justify-between text-left text-sm sm:text-base font-semibold text-black mb-0"
+              >
+                <span>⚙️ Advanced Settings (Speed Optimization)</span>
+                <span className="text-lg">{showAdvancedSettings ? '−' : '+'}</span>
+              </button>
+              
+              {showAdvancedSettings && (
+                <div className="mt-4 space-y-4 pt-4 border-t border-black">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label htmlFor="requestDelay" className="block text-xs sm:text-sm font-medium text-black mb-1.5">
+                        Request Delay (ms)
+                      </label>
+                      <input
+                        type="number"
+                        id="requestDelay"
+                        min="0"
+                        max="5000"
+                        step="50"
+                        value={requestDelay}
+                        onChange={(e) => setRequestDelay(Math.max(0, parseInt(e.target.value) || 0))}
+                        className="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none text-sm bg-white text-black"
+                      />
+                      <p className="mt-1 text-xs text-black opacity-60">
+                        Delay between each request (default: 700ms)
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="batchDelay" className="block text-xs sm:text-sm font-medium text-black mb-1.5">
+                        Batch Delay (ms)
+                      </label>
+                      <input
+                        type="number"
+                        id="batchDelay"
+                        min="0"
+                        max="5000"
+                        step="10"
+                        value={batchDelay}
+                        onChange={(e) => setBatchDelay(Math.max(0, parseInt(e.target.value) || 0))}
+                        className="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none text-sm bg-white text-black"
+                      />
+                      <p className="mt-1 text-xs text-black opacity-60">
+                        Delay between batches (default: 100ms)
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="batchSize" className="block text-xs sm:text-sm font-medium text-black mb-1.5">
+                        Batch Size
+                      </label>
+                      <input
+                        type="number"
+                        id="batchSize"
+                        min="1"
+                        max="50"
+                        step="1"
+                        value={batchSize}
+                        onChange={(e) => setBatchSize(Math.max(1, Math.min(50, parseInt(e.target.value) || 10)))}
+                        className="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none text-sm bg-white text-black"
+                      />
+                      <p className="mt-1 text-xs text-black opacity-60">
+                        Requests per batch (default: 10)
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <p className="text-xs sm:text-sm text-yellow-900">
+                      <strong>⚠️ Warning:</strong> Lower delays may cause rate limiting or 401 errors. Start with defaults and reduce gradually if needed.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Progress */}

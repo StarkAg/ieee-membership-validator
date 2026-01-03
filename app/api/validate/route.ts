@@ -17,10 +17,10 @@ class IEEEMembershipValidator {
   private cookie: string;
   private delay: number;
 
-  constructor(cookie: string) {
+  constructor(cookie: string, delay: number = 700) {
     this.baseUrl = 'https://services24.ieee.org/membership-validator.html';
     this.cookie = cookie;
-    this.delay = 700; // milliseconds - original delay as per requirements
+    this.delay = delay; // milliseconds - configurable delay
   }
 
   private checkSessionExpiry($: cheerio.CheerioAPI): boolean {
@@ -308,7 +308,7 @@ class IEEEMembershipValidator {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { cookie, membershipIds, batchStart = 0, batchSize = 10 } = body;
+    const { cookie, membershipIds, batchStart = 0, batchSize = 10, requestDelay = 700 } = body;
 
     if (!cookie) {
       return NextResponse.json({ error: 'Cookie is required' }, { status: 400 });
@@ -318,7 +318,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Membership IDs are required' }, { status: 400 });
     }
 
-    const validator = new IEEEMembershipValidator(cookie);
+    // Validate and clamp requestDelay to reasonable bounds
+    const delay = Math.max(0, Math.min(5000, parseInt(String(requestDelay)) || 700));
+
+    const validator = new IEEEMembershipValidator(cookie, delay);
     const results: ValidationResult[] = [];
 
     // Process in batches to avoid timeout
@@ -347,7 +350,7 @@ export async function POST(request: NextRequest) {
 
       // Add delay between requests (except for the last one)
       if (idx < batch.length - 1) {
-        await validator.sleep(700);
+        await validator.sleep(validator.delay);
       }
     }
 
