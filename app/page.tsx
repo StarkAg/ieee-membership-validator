@@ -57,17 +57,7 @@ export default function Home() {
       return;
     }
 
-    // Second check: Validator needs to be fired up
-    if (countdown !== null && countdown > 0) {
-      setRefreshMessage('⏳ Please wait for the validator to finish starting up. Click "Fire Up Validator API" if you haven\'t already.');
-      return;
-    }
-
-    if (countdown === null && !refreshMessage) {
-      setRefreshMessage('⚠️ Please click "Fire Up Validator API" before validating.');
-      return;
-    }
-
+    // Allow validation to proceed - API will handle errors appropriately
     setLoading(true);
     setError(null);
     setResults([]);
