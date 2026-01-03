@@ -326,7 +326,7 @@ export async function POST(request: NextRequest) {
     const endIdx = Math.min(startIdx + batchSize, membershipIds.length);
     const batch = membershipIds.slice(startIdx, endIdx);
 
-    let has401Error = false;
+    let hasSessionError = false;
     let refreshTriggered = false;
 
     for (let idx = 0; idx < batch.length; idx++) {
@@ -334,9 +334,15 @@ export async function POST(request: NextRequest) {
       const result = await validator.validateMember(memberId);
       results.push(result);
 
-      // Check for 401 error
-      if (result.error && (result.error.includes('401') || result.error.includes('Session expired'))) {
-        has401Error = true;
+      // Check for 401, 403, or session expired errors
+      if (result.error && (
+        result.error.includes('401') || 
+        result.error.includes('403') || 
+        result.error.includes('Session expired') ||
+        result.error.includes('Access denied')
+      )) {
+        hasSessionError = true;
+        console.log(`🔴 Session error detected for member ${memberId}: ${result.error}`);
       }
 
       // Add delay between requests (except for the last one)
@@ -345,14 +351,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // If 401 error detected, trigger GitHub Actions workflow to refresh cookie
-    if (has401Error && !refreshTriggered) {
+    // If session error detected (401/403), trigger GitHub Actions workflow to refresh cookie
+    if (hasSessionError && !refreshTriggered) {
+      console.log('🔄 Session error detected. Attempting to trigger cookie refresh workflow...');
       try {
         const githubToken = process.env.GITHUB_TOKEN;
         const githubRepo = process.env.GITHUB_REPO; // Format: "owner/repo"
         const workflowId = 'refresh-cookie.yml';
 
         if (githubToken && githubRepo) {
+          console.log(`📝 Triggering workflow: ${githubRepo}/${workflowId}`);
           const [owner, repo] = githubRepo.split('/');
           if (owner && repo) {
             const refreshResponse = await fetch(
@@ -399,7 +407,7 @@ export async function POST(request: NextRequest) {
       total: membershipIds.length,
       hasMore: endIdx < membershipIds.length,
       refreshTriggered: refreshTriggered,
-      has401Error: has401Error
+      hasSessionError: hasSessionError
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
