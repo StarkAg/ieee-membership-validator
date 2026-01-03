@@ -71,6 +71,13 @@ export default function Home() {
       const allResults: ValidationResult[] = [];
       let batchStart = 0;
 
+      // Log settings being used
+      console.log('⚙️ Validation settings:', { 
+        requestDelay: Number(requestDelay), 
+        batchDelay: Number(batchDelay), 
+        batchSize: Number(batchSize) 
+      });
+
       while (batchStart < ids.length) {
         const response = await fetch('/api/validate', {
           method: 'POST',
@@ -81,8 +88,8 @@ export default function Home() {
             cookie,
             membershipIds: ids,
             batchStart,
-            batchSize,
-            requestDelay,
+            batchSize: Number(batchSize),
+            requestDelay: Number(requestDelay),
           }),
         });
 
@@ -148,7 +155,9 @@ export default function Home() {
         
         // Delay between batches
         if (batchStart < ids.length) {
-          await new Promise(resolve => setTimeout(resolve, batchDelay));
+          const delay = Number(batchDelay);
+          console.log(`⏸️ Batch delay: ${delay}ms`);
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
     }
 
@@ -531,7 +540,10 @@ export default function Home() {
                         max="5000"
                         step="50"
                         value={requestDelay}
-                        onChange={(e) => setRequestDelay(Math.max(0, parseInt(e.target.value) || 0))}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 0;
+                          setRequestDelay(Math.max(0, val));
+                        }}
                         className="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none text-sm bg-white text-black"
                       />
                       <p className="mt-1 text-xs text-black opacity-60">
@@ -550,7 +562,10 @@ export default function Home() {
                         max="5000"
                         step="10"
                         value={batchDelay}
-                        onChange={(e) => setBatchDelay(Math.max(0, parseInt(e.target.value) || 0))}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 0;
+                          setBatchDelay(Math.max(0, val));
+                        }}
                         className="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none text-sm bg-white text-black"
                       />
                       <p className="mt-1 text-xs text-black opacity-60">
@@ -569,7 +584,10 @@ export default function Home() {
                         max="50"
                         step="1"
                         value={batchSize}
-                        onChange={(e) => setBatchSize(Math.max(1, Math.min(50, parseInt(e.target.value) || 10)))}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 10;
+                          setBatchSize(Math.max(1, Math.min(50, val)));
+                        }}
                         className="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none text-sm bg-white text-black"
                       />
                       <p className="mt-1 text-xs text-black opacity-60">

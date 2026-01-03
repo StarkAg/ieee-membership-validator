@@ -320,14 +320,24 @@ export async function POST(request: NextRequest) {
 
     // Validate and clamp requestDelay to reasonable bounds
     const delay = Math.max(0, Math.min(5000, parseInt(String(requestDelay)) || 700));
+    const actualBatchSize = Math.max(1, Math.min(50, parseInt(String(batchSize)) || 10));
+
+    console.log('⚙️ Backend received settings:', { 
+      requestDelay: delay, 
+      batchSize: actualBatchSize,
+      batchStart,
+      totalIds: membershipIds.length 
+    });
 
     const validator = new IEEEMembershipValidator(cookie, delay);
     const results: ValidationResult[] = [];
 
     // Process in batches to avoid timeout
     const startIdx = batchStart;
-    const endIdx = Math.min(startIdx + batchSize, membershipIds.length);
+    const endIdx = Math.min(startIdx + actualBatchSize, membershipIds.length);
     const batch = membershipIds.slice(startIdx, endIdx);
+    
+    console.log(`📦 Processing batch: ${startIdx} to ${endIdx} (size: ${batch.length}) with delay: ${delay}ms`);
 
     let hasSessionError = false;
     let refreshTriggered = false;
