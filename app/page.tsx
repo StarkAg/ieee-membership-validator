@@ -536,13 +536,13 @@ export default function Home() {
                       <input
                         type="number"
                         id="requestDelay"
-                        min="0"
+                        min="1"
                         max="5000"
-                        step="50"
+                        step="1"
                         value={requestDelay}
                         onChange={(e) => {
-                          const val = parseInt(e.target.value) || 0;
-                          setRequestDelay(Math.max(0, val));
+                          const val = parseInt(e.target.value) || 1;
+                          setRequestDelay(Math.max(1, val));
                         }}
                         className="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none text-sm bg-white text-black"
                       />
@@ -558,13 +558,13 @@ export default function Home() {
                       <input
                         type="number"
                         id="batchDelay"
-                        min="0"
+                        min="1"
                         max="5000"
-                        step="10"
+                        step="1"
                         value={batchDelay}
                         onChange={(e) => {
-                          const val = parseInt(e.target.value) || 0;
-                          setBatchDelay(Math.max(0, val));
+                          const val = parseInt(e.target.value) || 1;
+                          setBatchDelay(Math.max(1, val));
                         }}
                         className="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:outline-none text-sm bg-white text-black"
                       />
